@@ -1,0 +1,530 @@
+{
+  "nodes": [
+    {
+      "unique_id": "CAT_SITE",
+      "labels": [
+        "Category"
+      ],
+      "name": "SITE",
+      "fingerprint": "fp_site_001",
+      "description": "Site-level classification"
+    },
+    {
+      "unique_id": "CAT_PLANT",
+      "labels": [
+        "Category"
+      ],
+      "name": "PLANT",
+      "fingerprint": "fp_plant_001",
+      "description": "Plant-level classification"
+    },
+    {
+      "unique_id": "CAT_SECTION",
+      "labels": [
+        "Category"
+      ],
+      "name": "SECTION",
+      "fingerprint": "fp_section_001",
+      "description": "Section-level classification"
+    },
+    {
+      "unique_id": "CAT_SUB_SECTION",
+      "labels": [
+        "Category"
+      ],
+      "name": "SUB-SECTION",
+      "fingerprint": "fp_subsection_001",
+      "description": "Sub-section-level classification"
+    },
+    {
+      "unique_id": "LOC_AARDAL",
+      "labels": [
+        "Location"
+      ],
+      "name": "Aardal",
+      "fingerprint": "fp_aardal_001",
+      "description": "Aardal site"
+    },
+    {
+      "unique_id": "LOC_HALL_1",
+      "labels": [
+        "Location"
+      ],
+      "name": "Hall 1",
+      "fingerprint": "fp_hall1_001",
+      "description": "Hall 1 building"
+    },
+    {
+      "unique_id": "LOC_HALL_4",
+      "labels": [
+        "Location"
+      ],
+      "name": "Hall 4",
+      "fingerprint": "fp_hall4_001",
+      "description": "Hall 4 building"
+    },
+    {
+      "unique_id": "LOC_TANK_AREA",
+      "labels": [
+        "Location"
+      ],
+      "name": "Tank Area",
+      "fingerprint": "fp_tankarea_001",
+      "description": "Tank area within Hall 1"
+    },
+    {
+      "unique_id": "LOC_TANK_1",
+      "labels": [
+        "Location"
+      ],
+      "name": "Tank 1",
+      "fingerprint": "fp_tank1_001",
+      "description": "Tank 1"
+    },
+    {
+      "unique_id": "LOC_BIOFILTER_11",
+      "labels": [
+        "Location"
+      ],
+      "name": "Biofilter 11",
+      "fingerprint": "fp_biofilter11_001",
+      "description": "Biofilter unit 11"
+    },
+    {
+      "unique_id": "LOC_RESERVOIR100",
+      "labels": [
+        "Location"
+      ],
+      "name": "Reservoir100",
+      "fingerprint": "fp_reservoir100_001",
+      "description": "Reservoir 100"
+    },
+    {
+      "unique_id": "LOC_CENTER_CHANNEL",
+      "labels": [
+        "Location"
+      ],
+      "name": "CenterChannel",
+      "fingerprint": "fp_centerchannel_001",
+      "description": "Center channel"
+    },
+    {
+      "unique_id": "SYS_FEED_STORAGE",
+      "labels": [
+        "System"
+      ],
+      "name": "FeedStorage",
+      "fingerprint": "fp_feedstorage_001",
+      "description": "Feed storage system"
+    },
+    {
+      "unique_id": "SYS_FEEDING",
+      "labels": [
+        "System"
+      ],
+      "name": "Feeding System",
+      "fingerprint": "fp_feeding_001",
+      "description": "Feeding system"
+    },
+    {
+      "unique_id": "SYS_OXYGEN",
+      "labels": [
+        "System"
+      ],
+      "name": "Oxygen System",
+      "fingerprint": "fp_oxygen_001",
+      "description": "Oxygen system"
+    },
+    {
+      "unique_id": "SYS_FILTRATION",
+      "labels": [
+        "System"
+      ],
+      "name": "Filtration System",
+      "fingerprint": "fp_filtration_001",
+      "description": "Filtration system"
+    },
+    {
+      "unique_id": "MU_KMH",
+      "labels": [
+        "MeasuringUnit"
+      ],
+      "name": "km/h",
+      "fingerprint": "fp_kmh_001",
+      "description": "Kilometers per hour"
+    },
+    {
+      "unique_id": "ASSET_TSL_FIT001",
+      "labels": [
+        "Asset"
+      ],
+      "name": "TSL_FIT001",
+      "fingerprint": "fp_tsl_fit001_001",
+      "description": "Flow sensor"
+    },
+    {
+      "unique_id": "ASSET_TGL_10P001",
+      "labels": [
+        "Asset"
+      ],
+      "name": "TGL_10P001_00",
+      "fingerprint": "fp_tgl_10p001_001",
+      "description": "Tank level sensor"
+    },
+    {
+      "unique_id": "ASSET_OXYGEN_SENSOR",
+      "labels": [
+        "Asset"
+      ],
+      "name": "Oxygen Sensor",
+      "fingerprint": "fp_oxygen_sensor_001",
+      "description": "Oxygen sensor"
+    },
+    {
+      "unique_id": "ASSET_PUMP_001",
+      "labels": [
+        "Asset"
+      ],
+      "name": "Pump_001",
+      "fingerprint": "fp_pump001_001",
+      "description": "Pump 001"
+    },
+    {
+      "unique_id": "ASSET_VALVE_V001",
+      "labels": [
+        "Asset"
+      ],
+      "name": "Valve_V001",
+      "fingerprint": "fp_valve_v001_001",
+      "description": "Valve V001"
+    },
+    {
+      "unique_id": "ASSET_FLOW_METER_2",
+      "labels": [
+        "Asset"
+      ],
+      "name": "TSL_FIT002",
+      "fingerprint": "fp_tsl_fit002_001",
+      "description": "Flow sensor 2"
+    },
+    {
+      "unique_id": "ASSET_LEVEL_2",
+      "labels": [
+        "Asset"
+      ],
+      "name": "TGL_10P002_00",
+      "fingerprint": "fp_tgl_10p002_001",
+      "description": "Tank level sensor 2"
+    },
+    {
+      "unique_id": "ASSET_HALL4_PANEL",
+      "labels": [
+        "Asset"
+      ],
+      "name": "Hall4_ControlPanel",
+      "fingerprint": "fp_hall4_panel_001",
+      "description": "Control panel in Hall 4"
+    },
+    {
+      "unique_id": "SIG_FLOW_RAW",
+      "labels": [
+        "Signal"
+      ],
+      "name": "Flow_RAW",
+      "fingerprint": "fp_flow_raw_001",
+      "description": "Raw flow measurement",
+      "influx_guid": "influx_flow_raw_001"
+    },
+    {
+      "unique_id": "SIG_FLOW_1MIN",
+      "labels": [
+        "Signal"
+      ],
+      "name": "Flow_1_min_AVG_CLEAN",
+      "fingerprint": "fp_flow_1min_001",
+      "description": "1-minute averaged cleaned flow",
+      "influx_guid": "influx_flow_1min_001"
+    },
+    {
+      "unique_id": "SIG_FLOW_1HOUR",
+      "labels": [
+        "Signal"
+      ],
+      "name": "Flow_1_hour_AVG_CLEAN",
+      "fingerprint": "fp_flow_1hr_001",
+      "description": "1-hour averaged cleaned flow",
+      "influx_guid": "influx_flow_1hr_001"
+    },
+    {
+      "unique_id": "SIG_TEMP_RAW",
+      "labels": [
+        "Signal"
+      ],
+      "name": "Temperature_RAW",
+      "fingerprint": "fp_temp_raw_001",
+      "description": "Raw temperature",
+      "influx_guid": "influx_temp_raw_001"
+    }
+  ],
+  "relationships": [
+    {
+      "from_unique_id": "CAT_PLANT",
+      "to_unique_id": "CAT_SITE",
+      "type": "BELONGS_TO",
+      "validity_from": "2024-01-01T00:00:00Z",
+      "validity_to": null
+    },
+    {
+      "from_unique_id": "CAT_SECTION",
+      "to_unique_id": "CAT_PLANT",
+      "type": "BELONGS_TO",
+      "validity_from": "2024-01-01T00:00:00Z",
+      "validity_to": null
+    },
+    {
+      "from_unique_id": "CAT_SUB_SECTION",
+      "to_unique_id": "CAT_SECTION",
+      "type": "BELONGS_TO",
+      "validity_from": "2024-01-01T00:00:00Z",
+      "validity_to": null
+    },
+    {
+      "from_unique_id": "LOC_HALL_1",
+      "to_unique_id": "LOC_AARDAL",
+      "type": "LOCATED_IN",
+      "validity_from": "2024-01-01T00:00:00Z",
+      "validity_to": null
+    },
+    {
+      "from_unique_id": "LOC_HALL_4",
+      "to_unique_id": "LOC_AARDAL",
+      "type": "LOCATED_IN",
+      "validity_from": "2024-01-01T00:00:00Z",
+      "validity_to": null
+    },
+    {
+      "from_unique_id": "LOC_TANK_AREA",
+      "to_unique_id": "LOC_HALL_1",
+      "type": "LOCATED_IN",
+      "validity_from": "2024-01-01T00:00:00Z",
+      "validity_to": null
+    },
+    {
+      "from_unique_id": "LOC_TANK_1",
+      "to_unique_id": "LOC_TANK_AREA",
+      "type": "LOCATED_IN",
+      "validity_from": "2024-01-01T00:00:00Z",
+      "validity_to": null
+    },
+    {
+      "from_unique_id": "LOC_BIOFILTER_11",
+      "to_unique_id": "LOC_TANK_1",
+      "type": "LOCATED_IN",
+      "validity_from": "2024-01-01T00:00:00Z",
+      "validity_to": null
+    },
+    {
+      "from_unique_id": "LOC_RESERVOIR100",
+      "to_unique_id": "LOC_HALL_4",
+      "type": "LOCATED_IN",
+      "validity_from": "2024-01-01T00:00:00Z",
+      "validity_to": null
+    },
+    {
+      "from_unique_id": "LOC_CENTER_CHANNEL",
+      "to_unique_id": "LOC_HALL_4",
+      "type": "LOCATED_IN",
+      "validity_from": "2024-01-01T00:00:00Z",
+      "validity_to": null
+    },
+    {
+      "from_unique_id": "LOC_AARDAL",
+      "to_unique_id": "CAT_SITE",
+      "type": "BELONGS_TO_LOCATION_CATEGORY",
+      "validity_from": "2024-01-01T00:00:00Z",
+      "validity_to": null
+    },
+    {
+      "from_unique_id": "LOC_HALL_1",
+      "to_unique_id": "CAT_PLANT",
+      "type": "BELONGS_TO_LOCATION_CATEGORY",
+      "validity_from": "2024-01-01T00:00:00Z",
+      "validity_to": null
+    },
+    {
+      "from_unique_id": "LOC_HALL_4",
+      "to_unique_id": "CAT_PLANT",
+      "type": "BELONGS_TO_LOCATION_CATEGORY",
+      "validity_from": "2024-01-01T00:00:00Z",
+      "validity_to": null
+    },
+    {
+      "from_unique_id": "SYS_FEEDING",
+      "to_unique_id": "SYS_FEED_STORAGE",
+      "type": "PART_OF_SYSTEM",
+      "validity_from": "2024-01-01T00:00:00Z",
+      "validity_to": null
+    },
+    {
+      "from_unique_id": "SYS_FEED_STORAGE",
+      "to_unique_id": "CAT_SECTION",
+      "type": "BELONGS_TO_SYSTEM_CATEGORY",
+      "validity_from": "2024-01-01T00:00:00Z",
+      "validity_to": null
+    },
+    {
+      "from_unique_id": "SYS_FEEDING",
+      "to_unique_id": "CAT_SECTION",
+      "type": "BELONGS_TO_SYSTEM_CATEGORY",
+      "validity_from": "2024-01-01T00:00:00Z",
+      "validity_to": null
+    },
+    {
+      "from_unique_id": "SYS_OXYGEN",
+      "to_unique_id": "CAT_SECTION",
+      "type": "BELONGS_TO_SYSTEM_CATEGORY",
+      "validity_from": "2024-01-01T00:00:00Z",
+      "validity_to": null
+    },
+    {
+      "from_unique_id": "SYS_FILTRATION",
+      "to_unique_id": "CAT_SECTION",
+      "type": "BELONGS_TO_SYSTEM_CATEGORY",
+      "validity_from": "2024-01-01T00:00:00Z",
+      "validity_to": null
+    },
+    {
+      "from_unique_id": "ASSET_TSL_FIT001",
+      "to_unique_id": "LOC_TANK_1",
+      "type": "LOCATED_IN",
+      "validity_from": "2024-01-01T00:00:00Z",
+      "validity_to": null
+    },
+    {
+      "from_unique_id": "ASSET_TSL_FIT001",
+      "to_unique_id": "SYS_FEEDING",
+      "type": "PART_OF_SYSTEM",
+      "validity_from": "2024-01-01T00:00:00Z",
+      "validity_to": null
+    },
+    {
+      "from_unique_id": "ASSET_TGL_10P001",
+      "to_unique_id": "LOC_TANK_1",
+      "type": "LOCATED_IN",
+      "validity_from": "2024-01-01T00:00:00Z",
+      "validity_to": null
+    },
+    {
+      "from_unique_id": "ASSET_TGL_10P001",
+      "to_unique_id": "SYS_FEEDING",
+      "type": "PART_OF_SYSTEM",
+      "validity_from": "2024-01-01T00:00:00Z",
+      "validity_to": null
+    },
+    {
+      "from_unique_id": "ASSET_OXYGEN_SENSOR",
+      "to_unique_id": "LOC_BIOFILTER_11",
+      "type": "LOCATED_IN",
+      "validity_from": "2024-01-01T00:00:00Z",
+      "validity_to": null
+    },
+    {
+      "from_unique_id": "ASSET_OXYGEN_SENSOR",
+      "to_unique_id": "SYS_OXYGEN",
+      "type": "PART_OF_SYSTEM",
+      "validity_from": "2024-01-01T00:00:00Z",
+      "validity_to": null
+    },
+    {
+      "from_unique_id": "ASSET_PUMP_001",
+      "to_unique_id": "LOC_BIOFILTER_11",
+      "type": "LOCATED_IN",
+      "validity_from": "2024-01-01T00:00:00Z",
+      "validity_to": null
+    },
+    {
+      "from_unique_id": "ASSET_PUMP_001",
+      "to_unique_id": "SYS_FILTRATION",
+      "type": "PART_OF_SYSTEM",
+      "validity_from": "2024-01-01T00:00:00Z",
+      "validity_to": null
+    },
+    {
+      "from_unique_id": "ASSET_VALVE_V001",
+      "to_unique_id": "LOC_BIOFILTER_11",
+      "type": "LOCATED_IN",
+      "validity_from": "2024-01-01T00:00:00Z",
+      "validity_to": null
+    },
+    {
+      "from_unique_id": "ASSET_VALVE_V001",
+      "to_unique_id": "SYS_FILTRATION",
+      "type": "PART_OF_SYSTEM",
+      "validity_from": "2024-01-01T00:00:00Z",
+      "validity_to": null
+    },
+    {
+      "from_unique_id": "ASSET_FLOW_METER_2",
+      "to_unique_id": "LOC_RESERVOIR100",
+      "type": "LOCATED_IN",
+      "validity_from": "2024-01-01T00:00:00Z",
+      "validity_to": null
+    },
+    {
+      "from_unique_id": "ASSET_FLOW_METER_2",
+      "to_unique_id": "SYS_FEEDING",
+      "type": "PART_OF_SYSTEM",
+      "validity_from": "2024-01-01T00:00:00Z",
+      "validity_to": null
+    },
+    {
+      "from_unique_id": "ASSET_LEVEL_2",
+      "to_unique_id": "LOC_CENTER_CHANNEL",
+      "type": "LOCATED_IN",
+      "validity_from": "2024-01-01T00:00:00Z",
+      "validity_to": null
+    },
+    {
+      "from_unique_id": "ASSET_LEVEL_2",
+      "to_unique_id": "SYS_FEEDING",
+      "type": "PART_OF_SYSTEM",
+      "validity_from": "2024-01-01T00:00:00Z",
+      "validity_to": null
+    },
+    {
+      "from_unique_id": "ASSET_HALL4_PANEL",
+      "to_unique_id": "LOC_HALL_4",
+      "type": "LOCATED_IN",
+      "validity_from": "2024-01-01T00:00:00Z",
+      "validity_to": null
+    },
+    {
+      "from_unique_id": "SIG_FLOW_RAW",
+      "to_unique_id": "ASSET_TSL_FIT001",
+      "type": "MEASURES",
+      "validity_from": "2024-01-01T00:00:00Z",
+      "validity_to": null
+    },
+    {
+      "from_unique_id": "SIG_FLOW_1MIN",
+      "to_unique_id": "ASSET_TSL_FIT001",
+      "type": "MEASURES",
+      "validity_from": "2024-01-01T00:00:00Z",
+      "validity_to": null
+    },
+    {
+      "from_unique_id": "SIG_FLOW_1HOUR",
+      "to_unique_id": "ASSET_TSL_FIT001",
+      "type": "MEASURES",
+      "validity_from": "2024-01-01T00:00:00Z",
+      "validity_to": null
+    },
+    {
+      "from_unique_id": "SIG_TEMP_RAW",
+      "to_unique_id": "ASSET_OXYGEN_SENSOR",
+      "type": "MEASURES",
+      "validity_from": "2024-01-01T00:00:00Z",
+      "validity_to": null
+    }
+  ]
+}
