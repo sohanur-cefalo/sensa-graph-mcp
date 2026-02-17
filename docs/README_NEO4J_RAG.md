@@ -8,7 +8,7 @@ This folder contains a **Neo4j-based RAG (Retrieval-Augmented) application** tha
 | ----------------------- | --------------------------------------------------------------------------------------------------- |
 | `neo4j_dummy_data.json` | Dummy nodes and relationships to load into Neo4j (Categories, Locations, Systems, Assets, Signals). |
 | `load_neo4j.py`         | Script to clear the DB and load `neo4j_dummy_data.json` into Neo4j.                                 |
-| `neo4j_rag_mcp.py`      | FastMCP server exposing `get_node_by_name` and `aggregate_incoming`.                            |
+| `main.py`               | Main MCP server entry point; exposes `get_node_by_name`, `aggregate_incoming`, and related tools. |
 | `requirements.txt`      | Python dependencies (neo4j, fastmcp, python-dotenv).                                                |
 | `.env`                  | Optional; set NEO4J_URI, NEO4J_USER, NEO4J_PASSWORD (defaults in code if unset).                    |
 
@@ -60,13 +60,13 @@ This will:
 ## 4. Run the MCP server
 
 ```bash
-python neo4j_rag_mcp.py
+python main.py
 ```
 
 Or with FastMCP CLI (if you use it):
 
 ```bash
-fastmcp run neo4j_rag_mcp.py
+fastmcp run main.py
 ```
 
 ---
@@ -84,7 +84,7 @@ fastmcp run neo4j_rag_mcp.py
      "mcpServers": {
        "asset-graph-rag": {
          "command": "python",
-         "args": ["/Users/sohan/Documents/graph-sensa-rnd/neo4j_rag_mcp.py"],
+         "args": ["/path/to/graph-sensa-rnd/main.py"],
          "cwd": "/Users/sohan/Documents/graph-sensa-rnd",
          "env": {}
        }
@@ -96,7 +96,7 @@ fastmcp run neo4j_rag_mcp.py
 
    ```json
    "command": "python3",
-   "args": ["/Users/sohan/Documents/graph-sensa-rnd/neo4j_rag_mcp.py"],
+   "args": ["/path/to/graph-sensa-rnd/main.py"],
    "cwd": "/Users/sohan/Documents/graph-sensa-rnd"
    ```
 

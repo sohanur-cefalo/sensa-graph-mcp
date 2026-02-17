@@ -23,10 +23,14 @@ mcp = FastMCP(
     "Asset Graph RAG",
     instructions=(
         "Query the asset knowledge graph (Neo4j) via generic MCP tools for natural language QA. "
-        "Count/list in location: get_node_by_name(Location, name) then aggregate_incoming(LOCATED_IN, Asset, count|list) — incoming only. "
+        "Count/list in location by name: use aggregate_incoming_by_name(name, relationship_types=['LOCATED_IN'], target_label='Asset', aggregation='count'|'list') — finds ALL nodes with that name, then for EACH node counts/lists incoming assets and returns per-node breakdown plus total. "
+        "For a partial name (e.g. 'Biofilter' meaning all Biofilter 1, Biofilter 2, Biofilter 11, ...), use name_match='prefix' so names that START WITH the given string are included, then counts are aggregated across all matches. "
+        "To restrict to a parent (e.g. 'assets in Biofilter in Hall 1' or 'in Biofilter under RAS'): set parent_location_name='Hall 1' or parent_location_name='RAS' — only Location nodes that are transitively under that parent via LOCATED_IN are considered. "
+        "Single-node flow: get_node_by_name(name) then aggregate_incoming(node_id, ...) — get_node_by_name returns only the first match. "
         "Existence ('Do we have any X?'): count_nodes_by_name(name). "
         "Global count ('How many Assets in total?'): count_by_label(label). "
-        "List with full details: aggregate_incoming(..., aggregation='list', include_attributes=None)."
+        "List with full details: aggregate_incoming(..., aggregation='list', include_attributes=None). "
+        "When presenting count results from aggregate_incoming_by_name: always show the total first (e.g. 'There are N items (assets) in [LocationName] in total.'), then if there are multiple locations with that name, say 'That's across M locations named [LocationName]:', then a table with columns 'Location (fingerprint)' and 'Assets', one row per location (use the fingerprint field from each per_node entry), and a final 'Total' row with the total count. Always use this format for location asset counts."
     ),
 )
 
@@ -99,6 +103,7 @@ def get_node_by_name(
     Find a node by its name attribute. Looks up Location first, then Asset if not found.
     Use this first to get node_id for aggregate_incoming.
     For existence/count questions like "Do we have any Acidity?", prefer count_nodes_by_name.
+    Returns only the first matching node. For all nodes with this name and their asset counts, use aggregate_incoming_by_name.
     """
     driver = get_driver()
     with driver.session() as session:
@@ -113,6 +118,170 @@ def get_node_by_name(
                 out["found"] = True
                 return out
         return {"found": False, "node_id": None, "label": None, "attributes": None}
+
+
+def _name_where_condition(mode: Literal["exact", "prefix"]) -> str:
+    """Return Cypher WHERE condition for name match. Uses $name parameter."""
+    if mode == "prefix":
+        return "toLower(n.name) STARTS WITH toLower($name)"
+    return "toLower(n.name) = toLower($name)"
+
+
+@mcp.tool()
+def aggregate_incoming_by_name(
+    name: str,
+    relationship_types: list[str],
+    aggregation: Literal["count", "list"],
+    target_label: Optional[str] = None,
+    label: Optional[str] = None,
+    name_match: Literal["exact", "prefix"] = "exact",
+    parent_location_name: Optional[str] = None,
+    validity_filter: Optional[dict] = None,
+    limit: int = 1000,
+) -> dict[str, Any]:
+    """
+    Find ALL nodes matching the given name (Location first, then Asset), then for EACH such node
+    run the same logic as aggregate_incoming: count or list nodes that have INCOMING relationships
+    of the given types to that node. Use for questions like "How many assets in Biofilter 11?"
+    (exact) or "How many items in Biofilter?" (prefix: matches Biofilter 1, Biofilter 2, ...).
+    name_match: "exact" = full name match; "prefix" = names that start with name (e.g. Biofilter -> Biofilter 1, Biofilter 2, Biofilter 11). Returns per-node breakdown and total.
+    label: restrict name lookup to this label (default: try Location then Asset).
+    parent_location_name: if set, only consider Location nodes that are (transitively) under this
+    parent via outgoing LOCATED_IN (e.g. "Hall 1" or "RAS"). Use for "assets in Biofilter in Hall 1".
+    When presenting count results: show total first, then if multiple locations exist, a table with
+    columns "Location (fingerprint)" and "Assets" (use per_node[].fingerprint and per_node[].result), and a Total row. Always use this format.
+    """
+    if aggregation not in ("count", "list"):
+        return {"error": "aggregation must be 'count' or 'list' for aggregate_incoming_by_name"}
+    if target_label is not None and target_label not in ALLOWED_LABELS:
+        return {"error": f"target_label must be one of {sorted(ALLOWED_LABELS)}"}
+    if label is not None and label not in ALLOWED_LABELS:
+        return {"error": f"label must be one of {sorted(ALLOWED_LABELS)} or null"}
+
+    validity_filter = validity_filter or {}
+    current_only = validity_filter.get("current_only", True)
+    as_of_date = validity_filter.get("as_of_date")
+    validity_clause = ""
+    if current_only and not as_of_date:
+        validity_clause = " AND (r.validity_to IS NULL OR r.validity_to = '')"
+    elif as_of_date:
+        validity_clause = (
+            " AND r.validity_from <= datetime($as_of_date) "
+            "AND (r.validity_to IS NULL OR r.validity_to >= datetime($as_of_date))"
+        )
+
+    labels_to_try = [label] if label else list(GET_NODE_BY_NAME_LABELS)
+    rel_types = "|".join(relationship_types) if relationship_types else []
+    if not rel_types:
+        return {"error": "relationship_types cannot be empty"}
+    target_label_clause = f":{target_label}" if target_label else ""
+
+    name_cond = _name_where_condition(name_match)
+    # Only Location nodes can be filtered by parent (Location->Location LOCATED_IN hierarchy)
+    parent_clause = ""
+    parent_params: dict = {}
+    if parent_location_name:
+        parent_clause = " AND EXISTS { (n)-[:LOCATED_IN*]->(parent:Location) WHERE toLower(parent.name) = toLower($parent_name) }"
+        parent_params = {"parent_name": parent_location_name}
+
+    driver = get_driver()
+    with driver.session() as session:
+        # 1) Find all nodes matching name (exact or prefix), optionally under parent_location_name
+        start_nodes: list[dict] = []
+        for lbl in labels_to_try:
+            # Apply parent filter only to Location (hierarchy is Location LOCATED_IN Location)
+            use_parent = parent_location_name and lbl == "Location"
+            q = f"MATCH (n:{lbl}) WHERE {name_cond}{parent_clause if use_parent else ''} RETURN n"
+            params = {"name": name, **parent_params} if use_parent else {"name": name}
+            result = session.run(q, params)
+            for record in result:
+                out = _node_to_dict(record)
+                out["label"] = lbl
+                start_nodes.append(out)
+        if not start_nodes:
+            return {
+                "name": name,
+                "found": False,
+                "nodes": [],
+                "per_node": [],
+                "total_result": 0,
+                "total_relationship_count": 0,
+            }
+
+        params: dict = {"limit": limit}
+        if as_of_date:
+            params["as_of_date"] = as_of_date
+
+        per_node: list[dict[str, Any]] = []
+        total_result = 0
+        total_rel_count = 0
+
+        for node_info in start_nodes:
+            node_id = node_info.get("node_id")
+            if not node_id:
+                continue
+            match_start = "MATCH (start) WHERE elementId(start) = $start_node_id"
+            pattern = f"(target{target_label_clause})-[r:{rel_types}]->(start)"
+            params["start_node_id"] = node_id
+
+            if aggregation == "count":
+                query = f"""
+                {match_start}
+                MATCH {pattern}
+                WHERE 1=1 {validity_clause}
+                RETURN count(target) AS result, count(r) AS rel_count
+                """
+                result = session.run(query, params)
+                row = result.single()
+                cnt = row["result"] if row else 0
+                rel_count = row["rel_count"] if row else 0
+                attrs = node_info.get("attributes") or {}
+                per_node.append({
+                    "node_id": node_id,
+                    "label": node_info.get("label"),
+                    "fingerprint": attrs.get("fingerprint"),
+                    "attributes": attrs,
+                    "result": cnt,
+                    "relationship_count": rel_count,
+                })
+                total_result += cnt
+                total_rel_count += rel_count
+            else:
+                query = f"""
+                {match_start}
+                MATCH {pattern}
+                WHERE 1=1 {validity_clause}
+                RETURN target, elementId(target) AS target_id
+                LIMIT $limit
+                """
+                result = session.run(query, params)
+                nodes = []
+                for record in result:
+                    target = record.get("target")
+                    if target:
+                        d = dict(target)
+                        d["node_id"] = record.get("target_id")
+                        nodes.append(d)
+                attrs = node_info.get("attributes") or {}
+                per_node.append({
+                    "node_id": node_id,
+                    "label": node_info.get("label"),
+                    "fingerprint": attrs.get("fingerprint"),
+                    "attributes": attrs,
+                    "result": nodes,
+                    "relationship_count": len(nodes),
+                })
+                total_result += len(nodes)
+                total_rel_count += len(nodes)
+
+        return {
+            "name": name,
+            "found": True,
+            "nodes_count": len(start_nodes),
+            "per_node": per_node,
+            "total_result": total_result,
+            "total_relationship_count": total_rel_count,
+        }
 
 
 @mcp.tool()

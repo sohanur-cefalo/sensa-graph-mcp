@@ -1,12 +1,12 @@
 """
-Answer evaluation_questions.csv using the same logic as the 3 MCP tools:
-  get_node_by_name, count_nodes, aggregate_incoming
+Answer evaluation_questions.csv using the same logic as the MCP tools:
+  get_node_by_name, count_nodes_by_name, count_by_label, container_contents_count, container_contents_list
 
 Minimal tool usage:
-- Count in location: 1 get_node_by_name(Location, X) + 1 aggregate_incoming (LOCATED_IN, Asset, count)
-- Existence: 1 count_nodes(Asset, name)
-- Global count: 1 count_nodes(label)
-- List in location: 1 get_node_by_name(Location, X) + 1 aggregate_incoming (LOCATED_IN, Asset, list)
+- Count in location: get_node_by_name(X) + container_contents_count(LOCATED_IN, Asset) or container_contents_count_by_name
+- Existence: count_nodes_by_name(name)
+- Global count: count_by_label(label)
+- List in location: get_node_by_name(X) + container_contents_list(LOCATED_IN, Asset) or container_contents_list_by_name
 
 Requires Neo4j with data loaded via ingest_to_neo4j.py.
 
