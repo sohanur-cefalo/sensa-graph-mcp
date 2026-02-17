@@ -8,10 +8,29 @@ from neo4j_config import get_driver
 
 from tools._shared import build_validity_clause
 
-# Location categories: assets are counted via Location -[:BELONGS_TO_LOCATION_CATEGORY]-> Category
-LOCATION_CATEGORY_NAMES = ("Site", "Plant", "Section", "SubSection")
-# System categories: assets are counted via System -[:BELONG_TO_SYSTEM_CATEGORY]-> Category
-SYSTEM_CATEGORY_NAMES = ("System", "SubSystem")
+
+def _get_location_category_names(driver) -> list[str]:
+    """Dynamically discover location categories from the graph."""
+    with driver.session() as session:
+        query = """
+        MATCH (loc:Location)-[:BELONGS_TO_LOCATION_CATEGORY]->(cat:Category)
+        RETURN DISTINCT cat.name AS category_name
+        ORDER BY category_name
+        """
+        result = session.run(query)
+        return [record["category_name"] for record in result]
+
+
+def _get_system_category_names(driver) -> list[str]:
+    """Dynamically discover system categories from the graph."""
+    with driver.session() as session:
+        query = """
+        MATCH (sys:System)-[:BELONG_TO_SYSTEM_CATEGORY]->(cat:Category)
+        RETURN DISTINCT cat.name AS category_name
+        ORDER BY category_name
+        """
+        result = session.run(query)
+        return [record["category_name"] for record in result]
 
 
 def count_assets_by_category(
@@ -19,11 +38,10 @@ def count_assets_by_category(
     validity_filter: Optional[dict[str, Any]] = None,
 ) -> dict[str, Any]:
     """
-    Count assets per category. Use for "How many assets per Site/Plant/Section/SubSection?"
-    (location categories) and "How many assets per System/SubSystem category?" (system categories).
-    - location: only location categories (Site, Plant, Section, SubSection) — assets in locations
+    Count assets per category. Use for "How many assets per category?"
+    - location: only location categories — assets in locations
       that BELONGS_TO_LOCATION_CATEGORY that category.
-    - system: only system categories (System, SubSystem) — assets in systems that
+    - system: only system categories — assets in systems that
       BELONG_TO_SYSTEM_CATEGORY that category.
     - both: both location and system category breakdowns.
     """
@@ -46,32 +64,37 @@ def count_assets_by_category(
 
     with driver.session() as session:
         if category_scope in ("location", "both"):
-            # Per location category: count assets in locations that belong to this category
-            q_loc = f"""
-            MATCH (cat:Category) WHERE cat.name IN $loc_names
-            OPTIONAL MATCH (loc:Location)-[r_loc:BELONGS_TO_LOCATION_CATEGORY]->(cat)
-            OPTIONAL MATCH (a:Asset)-[r_in:LOCATED_IN]->(loc)
-            WHERE 1=1 {optional_validity}
-            WITH cat.name AS category_name, cat.fingerprint AS category_fingerprint,
-                 count(DISTINCT a) AS asset_count, count(DISTINCT loc) AS location_count
-            RETURN category_name, category_fingerprint, asset_count, location_count
-            ORDER BY category_name
-            """
-            result = session.run(
-                q_loc,
-                {"loc_names": list(LOCATION_CATEGORY_NAMES), **params},
-            )
-            rows = list(result)
-            for r in rows:
-                out["by_location_category"].append({
-                    "category_name": r["category_name"],
-                    "category_fingerprint": r["category_fingerprint"],
-                    "asset_count": r["asset_count"] or 0,
-                    "location_count": r["location_count"] or 0,
-                })
-            out["total_assets_location_categories"] = sum(
-                x["asset_count"] for x in out["by_location_category"]
-            )
+            # Dynamically discover location categories
+            location_category_names = _get_location_category_names(driver)
+            
+            if location_category_names:
+                # Per location category: count assets in locations that belong to this category
+                q_loc = f"""
+                MATCH (cat:Category) WHERE cat.name IN $loc_names
+                OPTIONAL MATCH (loc:Location)-[r_loc:BELONGS_TO_LOCATION_CATEGORY]->(cat)
+                OPTIONAL MATCH (a:Asset)-[r_in:LOCATED_IN]->(loc)
+                WHERE 1=1 {optional_validity}
+                WITH cat.name AS category_name, cat.fingerprint AS category_fingerprint,
+                     count(DISTINCT a) AS asset_count, count(DISTINCT loc) AS location_count
+                RETURN category_name, category_fingerprint, asset_count, location_count
+                ORDER BY category_name
+                """
+                result = session.run(
+                    q_loc,
+                    {"loc_names": location_category_names, **params},
+                )
+                rows = list(result)
+                for r in rows:
+                    out["by_location_category"].append({
+                        "category_name": r["category_name"],
+                        "category_fingerprint": r["category_fingerprint"],
+                        "asset_count": r["asset_count"] or 0,
+                        "location_count": r["location_count"] or 0,
+                    })
+                out["total_assets_location_categories"] = sum(
+                    x["asset_count"] for x in out["by_location_category"]
+                )
+            
             # Summary table
             lines = ["| Category | Asset count | Location count |", "| --- | --- | --- |"]
             for row in out["by_location_category"]:
@@ -84,32 +107,37 @@ def count_assets_by_category(
             out["summary_tables"]["location_categories"] = "\n".join(lines)
 
         if category_scope in ("system", "both"):
-            # Per system category: count assets in systems that belong to this category
-            q_sys = f"""
-            MATCH (cat:Category) WHERE cat.name IN $sys_names
-            OPTIONAL MATCH (sys:System)-[r_sys:BELONG_TO_SYSTEM_CATEGORY]->(cat)
-            OPTIONAL MATCH (a:Asset)-[r_part:PART_OF_SYSTEM]->(sys)
-            WHERE 1=1 {optional_validity_sys}
-            WITH cat.name AS category_name, cat.fingerprint AS category_fingerprint,
-                 count(DISTINCT a) AS asset_count, count(DISTINCT sys) AS system_count
-            RETURN category_name, category_fingerprint, asset_count, system_count
-            ORDER BY category_name
-            """
-            result = session.run(
-                q_sys,
-                {"sys_names": list(SYSTEM_CATEGORY_NAMES), **params},
-            )
-            rows = list(result)
-            for r in rows:
-                out["by_system_category"].append({
-                    "category_name": r["category_name"],
-                    "category_fingerprint": r["category_fingerprint"],
-                    "asset_count": r["asset_count"] or 0,
-                    "system_count": r["system_count"] or 0,
-                })
-            out["total_assets_system_categories"] = sum(
-                x["asset_count"] for x in out["by_system_category"]
-            )
+            # Dynamically discover system categories
+            system_category_names = _get_system_category_names(driver)
+            
+            if system_category_names:
+                # Per system category: count assets in systems that belong to this category
+                q_sys = f"""
+                MATCH (cat:Category) WHERE cat.name IN $sys_names
+                OPTIONAL MATCH (sys:System)-[r_sys:BELONG_TO_SYSTEM_CATEGORY]->(cat)
+                OPTIONAL MATCH (a:Asset)-[r_part:PART_OF_SYSTEM]->(sys)
+                WHERE 1=1 {optional_validity_sys}
+                WITH cat.name AS category_name, cat.fingerprint AS category_fingerprint,
+                     count(DISTINCT a) AS asset_count, count(DISTINCT sys) AS system_count
+                RETURN category_name, category_fingerprint, asset_count, system_count
+                ORDER BY category_name
+                """
+                result = session.run(
+                    q_sys,
+                    {"sys_names": system_category_names, **params},
+                )
+                rows = list(result)
+                for r in rows:
+                    out["by_system_category"].append({
+                        "category_name": r["category_name"],
+                        "category_fingerprint": r["category_fingerprint"],
+                        "asset_count": r["asset_count"] or 0,
+                        "system_count": r["system_count"] or 0,
+                    })
+                out["total_assets_system_categories"] = sum(
+                    x["asset_count"] for x in out["by_system_category"]
+                )
+            
             lines = ["| Category | Asset count | System count |", "| --- | --- | --- |"]
             for row in out["by_system_category"]:
                 lines.append(

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Any, Optional
 
-from neo4j_config import ALLOWED_LABELS, get_driver
+from neo4j_config import get_allowed_labels, get_driver
 
 from tools._shared import build_validity_clause
 
@@ -20,8 +20,9 @@ def container_contents_count(
     (use node_id from get_node_by_name). E.g. assets LOCATED_IN a location:
     relationship_types=["LOCATED_IN"], target_label="Asset".
     """
-    if target_label is not None and target_label not in ALLOWED_LABELS:
-        return {"error": f"target_label must be one of {sorted(ALLOWED_LABELS)}"}
+    allowed_labels = get_allowed_labels()
+    if target_label is not None and target_label not in allowed_labels:
+        return {"error": f"target_label must be one of {sorted(allowed_labels)}"}
 
     validity_clause, as_of_date = build_validity_clause(validity_filter)
     rel_types = "|".join(relationship_types) if relationship_types else ""

@@ -4,9 +4,9 @@ from __future__ import annotations
 
 from typing import Any, Optional
 
-from neo4j_config import get_driver
+from neo4j_config import get_driver, get_node_by_name_labels
 
-from tools._shared import GET_NODE_BY_NAME_LABELS, node_to_dict
+from tools._shared import node_to_dict
 
 
 def describe_node_connections(
@@ -14,19 +14,20 @@ def describe_node_connections(
     include_attributes: bool = False,
 ) -> dict[str, Any]:
     """
-    For a node found by name (Location, System, Asset, or Category), list all
+    For a node found by name (any available node type), list all
     incoming and outgoing relationships: type and the other node's name/label.
     Use for: "How is Feeding System connected?", "What is inside system X?",
     "How is system X connected with others?", "What links to Aardal?".
     """
     driver = get_driver()
+    labels = get_node_by_name_labels()
     with driver.session() as session:
         # Resolve name to node (same order as get_node_by_name)
         node_id: Optional[str] = None
         node_label: Optional[str] = None
         node_attrs: dict[str, Any] = {}
 
-        for lbl in GET_NODE_BY_NAME_LABELS:
+        for lbl in labels:
             query = (
                 f"MATCH (n:{lbl}) WHERE toLower(n.name) = toLower($name) "
                 "RETURN n LIMIT 1"
@@ -41,13 +42,14 @@ def describe_node_connections(
                 break
 
         if not node_id:
+            searched_labels = ", ".join(labels)
             return {
                 "found": False,
                 "name": name,
                 "node_id": None,
                 "incoming": [],
                 "outgoing": [],
-                "message": "No node found with this name (searched Location, System, Asset, Category).",
+                "message": f"No node found with this name (searched {searched_labels}).",
             }
 
         # Outgoing: (start)-[r]->(other)

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from neo4j_config import ALLOWED_LABELS, get_driver
+from neo4j_config import get_allowed_labels, get_driver
 
 
 def count_by_label(label: str) -> dict[str, Any]:
@@ -13,8 +13,9 @@ def count_by_label(label: str) -> dict[str, Any]:
     "How many Location entities are there in total?" or
     "What is the total number of Assets?".
     """
-    if label not in ALLOWED_LABELS:
-        return {"error": f"label must be one of {sorted(ALLOWED_LABELS)}"}
+    allowed_labels = get_allowed_labels()
+    if label not in allowed_labels:
+        return {"error": f"label must be one of {sorted(allowed_labels)}"}
     driver = get_driver()
     with driver.session() as session:
         query = f"MATCH (n:{label}) RETURN count(n) AS total"

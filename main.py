@@ -24,15 +24,15 @@ from tools.list_categories import list_categories  # Category nodes and BELONGS_
 
 MCP_INSTRUCTIONS: str = (
     "Query the asset knowledge graph (Neo4j) via MCP tools for natural language QA. "
-    "Entry point: Aardal is a Location connected to Site (Category) via BELONGS_TO_LOCATION_CATEGORY. "
-    "Categories: System, SubSystem, Site, Plant, Section, SubSection (and others). Use list_categories() to list all and how they connect (BELONGS_TO hierarchy). "
-    "Asset count per category: count_assets_by_category(category_scope='both') for assets per location category (Site/Plant/Section/SubSection) and per system category (System/SubSystem). "
-    "Connection details: describe_node_connections(name) — for any node (Location, System, Asset, Category) returns incoming and outgoing relationships (type + other node name/label). Use for 'How is system X connected?', 'What is inside X?', 'How are systems connected?'. "
+    "Use list_categories() to discover all available categories and their hierarchy (BELONGS_TO relationships). "
+    "Asset count per category: count_assets_by_category(category_scope='both') for assets per location and system categories. "
+    "Connection details: describe_node_connections(name) — for any node returns incoming and outgoing relationships (type + other node name/label). Use for 'How is X connected?', 'What is inside X?', 'How are nodes connected?'. "
     "Count in container by name: container_contents_count_by_name(name, relationship_types=['LOCATED_IN'], target_label='Asset') — counts incoming assets per node. "
-    "List in container by name: container_contents_list_by_name(name, ...). For systems use label='System' and relationship_types=['PART_OF_SYSTEM']. "
-    "For partial names use name_match='prefix'. parent_location_name restricts to a parent location. "
-    "Single node: get_node_by_name(name) — looks up Location, then System, then Asset, then Category; then container_contents_count(start_node_id, ...) or container_contents_list(start_node_id, ...). "
-    "Existence: count_nodes_by_name(name). Global count: count_by_label(label). "
+    "IMPORTANT for partial/generic queries like 'How many Halls?' or 'Halls in facility X': ALWAYS use container_contents_count_by_name with name_match='prefix' to find all matching nodes (e.g., Hall 1, Hall 2). "
+    "List in container by name: container_contents_list_by_name(name, ...). Specify appropriate relationship_types and label based on your use case. "
+    "For partial names or when looking for multiple numbered items (Hall 1, Hall 2, etc.) use name_match='prefix'. For exact matches use name_match='exact' (default). parent_location_name restricts to a parent location. "
+    "Single node: get_node_by_name(name) — looks up nodes by name across all available node types; then use container_contents_count(start_node_id, ...) or container_contents_list(start_node_id, ...). "
+    "Existence: count_nodes_by_name(name) checks for EXACT name matches only. For prefix/partial matching, use container_contents_count_by_name or container_contents_list_by_name with name_match='prefix'. Global count: count_by_label(label). "
     "Full breakdown: count_assets_breakdown(container_type='Both') and count_assets_by_category(category_scope='both'). "
     "When presenting count results: show total_count first, then display the summary_table as-is."
 )

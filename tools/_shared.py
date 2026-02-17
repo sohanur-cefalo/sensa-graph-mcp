@@ -4,10 +4,7 @@ from __future__ import annotations
 
 from typing import Any, Literal, Optional
 
-from neo4j_config import ALLOWED_LABELS, get_driver
-
-# Lookup order: Location, System, Asset, then Category (so "01_WMS" matches System node before Category "System")
-GET_NODE_BY_NAME_LABELS: tuple[str, ...] = ("Location", "System", "Asset", "Category")
+from neo4j_config import get_allowed_labels, get_driver, get_node_by_name_labels
 
 
 def node_to_dict(record: Any, node_var: str = "n") -> dict[str, Any]:

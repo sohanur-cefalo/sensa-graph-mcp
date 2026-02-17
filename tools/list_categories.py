@@ -9,8 +9,7 @@ from neo4j_config import get_driver
 
 def list_categories(include_hierarchy: bool = True) -> dict[str, Any]:
     """
-    List all Category nodes (Site, Plant, Section, SubSection, System, SubSystem, etc.)
-    and optionally how they connect to each other via BELONGS_TO.
+    List all Category nodes and optionally how they connect to each other via BELONGS_TO.
     Use for: "What categories exist?", "How are categories connected?",
     "What is the category hierarchy?".
     """

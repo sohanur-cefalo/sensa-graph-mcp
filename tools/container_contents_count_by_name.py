@@ -4,10 +4,9 @@ from __future__ import annotations
 
 from typing import Any, Literal, Optional
 
-from neo4j_config import ALLOWED_LABELS, get_driver
+from neo4j_config import get_allowed_labels, get_driver, get_node_by_name_labels
 
 from tools._shared import (
-    GET_NODE_BY_NAME_LABELS,
     build_validity_clause,
     format_count_summary_table,
     name_where_condition,
@@ -25,18 +24,19 @@ def container_contents_count_by_name(
     validity_filter: Optional[dict[str, Any]] = None,
 ) -> dict[str, Any]:
     """
-    Find ALL nodes matching the given name (Location, System, or Asset), then for EACH
+    Find ALL nodes matching the given name, then for EACH
     count nodes that have INCOMING relationships of the given types to that node.
     Use for "How many assets in Biofilter 11?" (exact) or "How many items in Biofilter?"
     (prefix). Returns per-node breakdown and summary_table with total.
     """
-    if target_label is not None and target_label not in ALLOWED_LABELS:
-        return {"error": f"target_label must be one of {sorted(ALLOWED_LABELS)}"}
-    if label is not None and label not in ALLOWED_LABELS:
-        return {"error": f"label must be one of {sorted(ALLOWED_LABELS)} or null"}
+    allowed_labels = get_allowed_labels()
+    if target_label is not None and target_label not in allowed_labels:
+        return {"error": f"target_label must be one of {sorted(allowed_labels)}"}
+    if label is not None and label not in allowed_labels:
+        return {"error": f"label must be one of {sorted(allowed_labels)} or null"}
 
     validity_clause, as_of_date = build_validity_clause(validity_filter)
-    labels_to_try = [label] if label else list(GET_NODE_BY_NAME_LABELS)
+    labels_to_try = [label] if label else list(get_node_by_name_labels())
     rel_types = "|".join(relationship_types) if relationship_types else []
     if not rel_types:
         return {"error": "relationship_types cannot be empty"}
@@ -47,16 +47,18 @@ def container_contents_count_by_name(
     parent_params: dict[str, Any] = {}
     if parent_location_name:
         parent_clause = (
-            " AND EXISTS { (n)-[:LOCATED_IN*]->(parent:Location) "
-            "WHERE toLower(parent.name) = toLower($parent_name) }"
+            " AND EXISTS { (n)-[:LOCATED_IN*]->(parent) "
+            "WHERE (parent:Location OR parent:Context) AND toLower(parent.name) = toLower($parent_name) }"
         )
         parent_params = {"parent_name": parent_location_name}
 
     driver = get_driver()
     with driver.session() as session:
         start_nodes: list[dict[str, Any]] = []
+        seen_node_ids: set[str] = set()  # Deduplicate by node_id to avoid double-counting nodes with multiple labels
         for lbl in labels_to_try:
-            use_parent = parent_location_name and lbl == "Location"
+            # Apply parent filter to Location and Context nodes (both can be locations)
+            use_parent = parent_location_name and lbl in ("Location", "Context")
             q = (
                 f"MATCH (n:{lbl}) WHERE {name_cond}"
                 f"{parent_clause if use_parent else ''} RETURN n"
@@ -65,8 +67,11 @@ def container_contents_count_by_name(
             result = session.run(q, params)
             for record in result:
                 out = node_to_dict(record)
-                out["label"] = lbl
-                start_nodes.append(out)
+                node_id = out.get("node_id")
+                if node_id and node_id not in seen_node_ids:
+                    seen_node_ids.add(node_id)
+                    out["label"] = lbl
+                    start_nodes.append(out)
 
         if not start_nodes:
             return {

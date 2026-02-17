@@ -4,9 +4,7 @@ from __future__ import annotations
 
 from typing import Any, Optional
 
-from neo4j_config import ALLOWED_LABELS, get_driver
-
-from tools._shared import GET_NODE_BY_NAME_LABELS
+from neo4j_config import get_allowed_labels, get_driver, get_node_by_name_labels
 
 
 def count_nodes_by_name(
@@ -16,12 +14,13 @@ def count_nodes_by_name(
     """
     Count nodes with the given name. Use for existence/count questions like
     "Do we have any Acidity?" or "How many X are there?". If label is not set,
-    counts across Location, System, and Asset (same order as get_node_by_name).
+    counts across all available node types in priority order.
     Returns total count and per-label breakdown.
     """
-    if label is not None and label not in ALLOWED_LABELS:
-        return {"error": f"label must be one of {sorted(ALLOWED_LABELS)} or null"}
-    labels_to_count = [label] if label else list(GET_NODE_BY_NAME_LABELS)
+    allowed_labels = get_allowed_labels()
+    if label is not None and label not in allowed_labels:
+        return {"error": f"label must be one of {sorted(allowed_labels)} or null"}
+    labels_to_count = [label] if label else list(get_node_by_name_labels())
     driver = get_driver()
     with driver.session() as session:
         total = 0
