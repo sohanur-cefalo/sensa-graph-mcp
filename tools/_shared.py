@@ -6,7 +6,8 @@ from typing import Any, Literal, Optional
 
 from neo4j_config import ALLOWED_LABELS, get_driver
 
-GET_NODE_BY_NAME_LABELS: tuple[str, ...] = ("Location", "System", "Asset")
+# Lookup order: Location, System, Asset, then Category (so "01_WMS" matches System node before Category "System")
+GET_NODE_BY_NAME_LABELS: tuple[str, ...] = ("Location", "System", "Asset", "Category")
 
 
 def node_to_dict(record: Any, node_var: str = "n") -> dict[str, Any]:
@@ -52,17 +53,18 @@ def format_count_summary_table(
 
 def build_validity_clause(
     validity_filter: Optional[dict[str, Any]],
+    rel_var: str = "r",
 ) -> tuple[str, Optional[str]]:
-    """Return (validity_clause, as_of_date)."""
+    """Return (validity_clause, as_of_date). rel_var is the relationship variable name in the query."""
     validity_filter = validity_filter or {}
     current_only = validity_filter.get("current_only", True)
     as_of_date = validity_filter.get("as_of_date")
     if current_only and not as_of_date:
-        clause = " AND (r.validity_to IS NULL OR r.validity_to = '')"
+        clause = f" AND ({rel_var}.validity_to IS NULL OR {rel_var}.validity_to = '')"
     elif as_of_date:
         clause = (
-            " AND r.validity_from <= datetime($as_of_date) "
-            "AND (r.validity_to IS NULL OR r.validity_to >= datetime($as_of_date))"
+            f" AND {rel_var}.validity_from <= datetime($as_of_date) "
+            f"AND ({rel_var}.validity_to IS NULL OR {rel_var}.validity_to >= datetime($as_of_date))"
         )
     else:
         clause = ""

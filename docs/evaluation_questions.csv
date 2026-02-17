@@ -1,11 +1,50 @@
 Question,Probable Answer,Type
 Count the number of assets in Biofilter 11
 
+Describe / connections:
+How is Hall 1 connected?
+Describe the Water Quality Treatment System
+What is inside the Degassing System?
+
+
+Totals & counts:
+Total assets in the graph?
+How many assets are in the graph?
+Count the number of assets in Biofilter 11
+How many assets in CenterChannel?
+How many assets in Hall 2?
+
+
+By system:
+How many assets in the Oxygenation System?
+List assets in the Water Quality Treatment System
+Count assets in the Degassing System
+By location (with context)
+Count the number of assets in Biofilter
+Count the number of assets in Biofilter connected with Hall 1
+How many assets in Tank_1?
+What locations and systems exist under Aardal?
+
+
+Categories & structure
+What categories exist in the graph?
+How many assets per location?
+Give me the full asset breakdown by location and system
+
+
 complex:
+describe the system node
 total assets in the graph
 Count the number of assets in Biofilter
 Count the number of assets in Biofilter connect with hall 1
 
+Location dimension:
+
+How many Halls are there on the Aardal site/facility?
+What are the names of the tanks in Hall 1
+Where are the biofilters located in aardal
+How many tanks are there in the aardal site/facility
+Are there any dedicated areas for pumps
 
 
 Count the number of assets in Biofilter 11.,1,Count Items in Location (EN)
