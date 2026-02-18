@@ -1,0 +1,19 @@
+# Node modules
+node_modules
+
+# Build outputs
+dist
+.vite
+
+# Environment files
+.env
+
+# System files
+.DS_Store
+
+# Git
+.git
+.gitignore
+
+# Logs
+*.log

@@ -31,6 +31,10 @@ venv/
 .venv/
 ENV/
 
+# Node.js / Frontend
+frontend/node_modules/
+node_modules/
+
 # IDE and editors
 .idea/
 .vscode/

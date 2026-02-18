@@ -1,0 +1,31 @@
+{
+  "name": "knowledge-graph-visualization",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "vite",
+    "dev:client": "vite",
+    "build": "vite build",
+    "start": "vite preview"
+  },
+  "devDependencies": {
+    "@types/estree": "^1.0.8",
+    "@types/humps": "^2.0.6",
+    "@types/react": "^19.0.12",
+    "@types/react-dom": "^19.0.4",
+    "autoprefixer": "^10.4.14",
+    "typescript": "^5.8.2",
+    "vite": "^7.2.4"
+  },
+  "dependencies": {
+    "@neo4j-nvl/base": "^1.0.0",
+    "@neo4j-nvl/react": "^1.0.0",
+    "@tailwindcss/vite": "^4.1.17",
+    "humps": "^2.0.1",
+    "neo4j-driver": "^5.15.0",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "react-markdown": "^10.1.0",
+    "remark-gfm": "^4.0.1",
+    "tailwindcss": "^4.1.17"
+  }
+}

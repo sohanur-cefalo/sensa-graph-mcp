@@ -1,0 +1,234 @@
+Question,Probable Answer,Type
+Count the number of assets in Biofilter 11
+
+Describe / connections:
+How is Hall 1 connected?
+Describe the Water Quality Treatment System
+What is inside the Degassing System?
+
+
+Totals & counts:
+Total assets in the graph?
+How many assets are in the graph?
+Count the number of assets in Biofilter 11
+How many assets in CenterChannel?
+How many assets in Hall 2?
+
+
+By system:
+How many assets in the Oxygenation System?
+List assets in the Water Quality Treatment System
+Count assets in the Degassing System
+By location (with context)
+Count the number of assets in Biofilter
+Count the number of assets in Biofilter connected with Hall 1
+How many assets in Tank_1?
+What locations and systems exist under Aardal?
+
+
+Categories & structure
+What categories exist in the graph?
+How many assets per location?
+Give me the full asset breakdown by location and system
+
+
+complex:
+describe the system node
+total assets in the graph
+Count the number of assets in Biofilter
+Count the number of assets in Biofilter connect with hall 1
+
+Location dimension:
+
+How many Halls are there on the Fishglob site/facility?
+What are the names of the tanks in Hall 1
+Where are the biofilters located in site
+How many tanks are there in the site/facility
+Are there any dedicated areas for pumps
+
+
+Count the number of assets in Biofilter 11.,1,Count Items in Location (EN)
+Count the number of items in Biofilter 11.,1,Count Items in Location (EN)
+Count the number of items in Biofilter 11.,1,Count Items in Location (EN)
+Count the number of items in Biofilter 12.,1,Count Items in Location (EN)
+Count the number of items in Biofilter 13.,1,Count Items in Location (EN)
+Count the number of items in Biofilter 13.,1,Count Items in Location (EN)
+Count the number of items in Biofilter 14.,1,Count Items in Location (EN)
+Count the number of items in Biofilter 15.,1,Count Items in Location (EN)
+Count the number of items in Biofilter 15.,1,Count Items in Location (EN)
+Count the number of items in Biofilter 2.,1,Count Items in Location (EN)
+Count the number of items in Biofilter 3.,1,Count Items in Location (EN)
+Count the number of items in Biofilter 3.,1,Count Items in Location (EN)
+Count the number of items in Biofilter 4.,1,Count Items in Location (EN)
+Count the number of items in Biofilter 4.,1,Count Items in Location (EN)
+Count the number of items in Biofilter 5.,1,Count Items in Location (EN)
+Count the number of items in Biofilter 7.,1,Count Items in Location (EN)
+Count the number of items in Biofilter 7.,1,Count Items in Location (EN)
+Count the number of items in Biofilter 7.,1,Count Items in Location (EN)
+Count the number of items in CenterChannel.,13,Count Items in Location (EN)
+Count the number of items in CenterChannel.,12,Count Items in Location (EN)
+Count the number of items in CenterChannel.,12,Count Items in Location (EN)
+Count the number of items in Hall 4.,2,Count Items in Location (EN)
+Count the number of items in Reservoir100.,1,Count Items in Location (EN)
+Count the number of items in Reservoir100.,1,Count Items in Location (EN)
+Count the number of items in SensorTray.,2,Count Items in Location (EN)
+Count the number of items in Tank_2.,3,Count Items in Location (EN)
+Count the number of items in Tank_2.,3,Count Items in Location (EN)
+Count the number of items in Tank_3.,3,Count Items in Location (EN)
+Count the number of items in Tank_4.,3,Count Items in Location (EN)
+Count the number of items in Treatment area.,1,Count Items in Location (EN)
+Count the number of items in Treatment area.,1,Count Items in Location (EN)
+How many items are located in Biofilter 10?,1,Count Items in Location (EN)
+How many items are located in Biofilter 10?,1,Count Items in Location (EN)
+How many items are located in Biofilter 10?,1,Count Items in Location (EN)
+How many items are located in Biofilter 12?,1,Count Items in Location (EN)
+How many items are located in Biofilter 14?,1,Count Items in Location (EN)
+How many items are located in Biofilter 14?,1,Count Items in Location (EN)
+How many items are located in Biofilter 15?,1,Count Items in Location (EN)
+How many items are located in Biofilter 16?,1,Count Items in Location (EN)
+How many items are located in Biofilter 16?,1,Count Items in Location (EN)
+How many items are located in Biofilter 16?,1,Count Items in Location (EN)
+How many items are located in Biofilter 4?,1,Count Items in Location (EN)
+How many items are located in Biofilter 5?,1,Count Items in Location (EN)
+How many items are located in Biofilter 6?,1,Count Items in Location (EN)
+How many items are located in Biofilter 6?,1,Count Items in Location (EN)
+How many items are located in Biofilter 8?,1,Count Items in Location (EN)
+How many items are located in Biofilter 8?,1,Count Items in Location (EN)
+How many items are located in CenterChannel?,12,Count Items in Location (EN)
+How many items are located in Hall 2?,10,Count Items in Location (EN)
+How many items are located in Reservoir100?,1,Count Items in Location (EN)
+How many items are located in Reservoir200?,1,Count Items in Location (EN)
+How many items are located in SensorTray?,2,Count Items in Location (EN)
+How many items are located in SensorTray?,2,Count Items in Location (EN)
+How many items are located in Tank_1?,3,Count Items in Location (EN)
+How many items are located in Tank_1?,3,Count Items in Location (EN)
+How many items are located in Tank_2?,3,Count Items in Location (EN)
+How many items are located in Tank_3?,3,Count Items in Location (EN)
+How many items are located in Tank_3?,3,Count Items in Location (EN)
+How many items are located in Tank_4?,3,Count Items in Location (EN)
+How many items are located in Tank_4?,3,Count Items in Location (EN)
+How many items are located in Treatment area?,1,Count Items in Location (EN)
+What's the total count of items present in Biofilter 12?,1,Count Items in Location (EN)
+What's the total count of items present in Biofilter 13?,1,Count Items in Location (EN)
+What's the total count of items present in Biofilter 1?,1,Count Items in Location (EN)
+What's the total count of items present in Biofilter 1?,1,Count Items in Location (EN)
+What's the total count of items present in Biofilter 1?,1,Count Items in Location (EN)
+What's the total count of items present in Biofilter 2?,1,Count Items in Location (EN)
+What's the total count of items present in Biofilter 2?,1,Count Items in Location (EN)
+What's the total count of items present in Biofilter 3?,1,Count Items in Location (EN)
+What's the total count of items present in Biofilter 5?,1,Count Items in Location (EN)
+What's the total count of items present in Biofilter 6?,1,Count Items in Location (EN)
+What's the total count of items present in Biofilter 8?,1,Count Items in Location (EN)
+What's the total count of items present in Biofilter 9?,1,Count Items in Location (EN)
+What's the total count of items present in Biofilter 9?,1,Count Items in Location (EN)
+What's the total count of items present in Biofilter 9?,1,Count Items in Location (EN)
+What's the total count of items present in Hall 1?,2,Count Items in Location (EN)
+What's the total count of items present in Hall 3?,2,Count Items in Location (EN)
+What's the total count of items present in Reservoir100?,1,Count Items in Location (EN)
+What's the total count of items present in SensorTray?,2,Count Items in Location (EN)
+What's the total count of items present in Tank_1?,3,Count Items in Location (EN)
+What's the total count of items present in Tank_1?,3,Count Items in Location (EN)
+What's the total count of items present in Tank_2?,3,Count Items in Location (EN)
+What's the total count of items present in Tank_3?,3,Count Items in Location (EN)
+What's the total count of items present in Tank_4?,3,Count Items in Location (EN)
+What's the total count of items present in Treatment area?,1,Count Items in Location (EN)
+Are there any Flows?,"Yes, there are 9 Flows.",Existence Check (EN)
+Are there any Temperatures?,"Yes, there are 4 Temperatures.",Existence Check (EN)
+Do we have any Acidity?,"Yes, there are 4 Aciditys.",Existence Check (EN)
+Do we have any Motor_Current?,"Yes, there are 49 Motor_Currents.",Existence Check (EN)
+Do we have any Oxygen?,"Yes, there are 28 Oxygens.",Existence Check (EN)
+Do we have any Ozone?,"Yes, there are 1 Ozones.",Existence Check (EN)
+Do we have any Redox?,"Yes, there are 2 Redoxs.",Existence Check (EN)
+Do we have any Salinity?,"Yes, there are 4 Salinitys.",Existence Check (EN)
+Is there a CO here?,"Yes, there are 8 COs.",Existence Check (EN)
+Is there a Capacity here?,"Yes, there are 1 Capacitys.",Existence Check (EN)
+Is there a Total_Gas_Pressure here?,"Yes, there are 8 Total_Gas_Pressures.",Existence Check (EN)
+How many Location entities are there in total?,139,Global Count (EN)
+How many MeasuringUnit entities are there in total?,13,Global Count (EN)
+What is the total number of Assets?,118,Global Count (EN)
+What is the total number of Systems?,44,Global Count (EN)
+List equipment in Biofilter 1.,,Imprecise Listing in Location (EN)
+List equipment in Biofilter 1.,,Imprecise Listing in Location (EN)
+List equipment in Biofilter 12.,,Imprecise Listing in Location (EN)
+List equipment in Biofilter 13.,,Imprecise Listing in Location (EN)
+List equipment in Biofilter 14.,,Imprecise Listing in Location (EN)
+List equipment in Biofilter 15.,,Imprecise Listing in Location (EN)
+List equipment in Biofilter 2.,,Imprecise Listing in Location (EN)
+List equipment in Biofilter 3.,,Imprecise Listing in Location (EN)
+List equipment in Biofilter 4.,,Imprecise Listing in Location (EN)
+List equipment in Biofilter 5.,,Imprecise Listing in Location (EN)
+List equipment in Biofilter 5.,,Imprecise Listing in Location (EN)
+List equipment in Biofilter 6.,,Imprecise Listing in Location (EN)
+List equipment in Hall 3.,,Imprecise Listing in Location (EN)
+List equipment in Reservoir100.,,Imprecise Listing in Location (EN)
+List equipment in Reservoir100.,,Imprecise Listing in Location (EN)
+List equipment in SensorTray.,,Imprecise Listing in Location (EN)
+List equipment in Tank_2.,,Imprecise Listing in Location (EN)
+List equipment in Tank_2.,,Imprecise Listing in Location (EN)
+List equipment in Tank_3.,,Imprecise Listing in Location (EN)
+List equipment in Tank_4.,,Imprecise Listing in Location (EN)
+List equipment in Treatment area.,,Imprecise Listing in Location (EN)
+List equipment in Treatment area.,,Imprecise Listing in Location (EN)
+List equipment in Treatment area.,,Imprecise Listing in Location (EN)
+Show me everything in Biofilter 1.,,Imprecise Listing in Location (EN)
+Show me everything in Biofilter 10.,,Imprecise Listing in Location (EN)
+Show me everything in Biofilter 11.,,Imprecise Listing in Location (EN)
+Show me everything in Biofilter 12.,,Imprecise Listing in Location (EN)
+Show me everything in Biofilter 13.,,Imprecise Listing in Location (EN)
+Show me everything in Biofilter 14.,,Imprecise Listing in Location (EN)
+Show me everything in Biofilter 16.,,Imprecise Listing in Location (EN)
+Show me everything in Biofilter 2.,,Imprecise Listing in Location (EN)
+Show me everything in Biofilter 2.,,Imprecise Listing in Location (EN)
+Show me everything in Biofilter 3.,,Imprecise Listing in Location (EN)
+Show me everything in Biofilter 4.,,Imprecise Listing in Location (EN)
+Show me everything in Biofilter 4.,,Imprecise Listing in Location (EN)
+Show me everything in Biofilter 7.,,Imprecise Listing in Location (EN)
+Show me everything in Biofilter 7.,,Imprecise Listing in Location (EN)
+Show me everything in Biofilter 8.,,Imprecise Listing in Location (EN)
+Show me everything in Biofilter 8.,,Imprecise Listing in Location (EN)
+Show me everything in Biofilter 9.,,Imprecise Listing in Location (EN)
+Show me everything in Biofilter 9.,,Imprecise Listing in Location (EN)
+Show me everything in Biofilter 9.,,Imprecise Listing in Location (EN)
+Show me everything in CenterChannel.,,Imprecise Listing in Location (EN)
+Show me everything in CenterChannel.,,Imprecise Listing in Location (EN)
+Show me everything in Reservoir200.,,Imprecise Listing in Location (EN)
+Show me everything in SensorTray.,,Imprecise Listing in Location (EN)
+Show me everything in SensorTray.,,Imprecise Listing in Location (EN)
+Show me everything in Tank_1.,,Imprecise Listing in Location (EN)
+Show me everything in Tank_1.,,Imprecise Listing in Location (EN)
+Show me everything in Tank_2.,,Imprecise Listing in Location (EN)
+Show me everything in Tank_3.,,Imprecise Listing in Location (EN)
+Show me everything in Tank_4.,,Imprecise Listing in Location (EN)
+What's inside Biofilter 10?,,Imprecise Listing in Location (EN)
+What's inside Biofilter 10?,,Imprecise Listing in Location (EN)
+What's inside Biofilter 11?,,Imprecise Listing in Location (EN)
+What's inside Biofilter 11?,,Imprecise Listing in Location (EN)
+What's inside Biofilter 12?,,Imprecise Listing in Location (EN)
+What's inside Biofilter 13?,,Imprecise Listing in Location (EN)
+What's inside Biofilter 14?,,Imprecise Listing in Location (EN)
+What's inside Biofilter 15?,,Imprecise Listing in Location (EN)
+What's inside Biofilter 15?,,Imprecise Listing in Location (EN)
+What's inside Biofilter 16?,,Imprecise Listing in Location (EN)
+What's inside Biofilter 16?,,Imprecise Listing in Location (EN)
+What's inside Biofilter 3?,,Imprecise Listing in Location (EN)
+What's inside Biofilter 5?,,Imprecise Listing in Location (EN)
+What's inside Biofilter 6?,,Imprecise Listing in Location (EN)
+What's inside Biofilter 6?,,Imprecise Listing in Location (EN)
+What's inside Biofilter 7?,,Imprecise Listing in Location (EN)
+What's inside Biofilter 8?,,Imprecise Listing in Location (EN)
+What's inside CenterChannel?,,Imprecise Listing in Location (EN)
+What's inside CenterChannel?,,Imprecise Listing in Location (EN)
+What's inside Hall 1?,,Imprecise Listing in Location (EN)
+What's inside Hall 2?,,Imprecise Listing in Location (EN)
+What's inside Hall 4?,,Imprecise Listing in Location (EN)
+What's inside Reservoir100?,,Imprecise Listing in Location (EN)
+What's inside Reservoir100?,,Imprecise Listing in Location (EN)
+What's inside SensorTray?,,Imprecise Listing in Location (EN)
+What's inside Tank_1?,,Imprecise Listing in Location (EN)
+What's inside Tank_1?,,Imprecise Listing in Location (EN)
+What's inside Tank_2?,,Imprecise Listing in Location (EN)
+What's inside Tank_3?,,Imprecise Listing in Location (EN)
+What's inside Tank_3?,,Imprecise Listing in Location (EN)
+What's inside Tank_4?,,Imprecise Listing in Location (EN)
+What's inside Tank_4?,,Imprecise Listing in Location (EN)
+What's inside Treatment area?,,Imprecise Listing in Location (EN)
