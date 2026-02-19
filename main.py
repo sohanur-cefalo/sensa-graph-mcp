@@ -16,7 +16,9 @@ from tools.count_by_label import count_by_label  # Global count: "Total assets i
 from tools.count_nodes_by_name import count_nodes_by_name  # Existence/count by name: "Do we have any X?", "How many named X?"
 from tools.describe_node_connections import describe_node_connections  # How a node is connected (in/out relationships)
 from tools.get_node_by_name import get_node_by_name  # Find one node by name (Location→System→Asset→Category); get node_id for count/list tools
+from tools.get_schema import get_schema  # Introspect labels, relationship types, property keys (fallback)
 from tools.list_categories import list_categories  # Category nodes and BELONGS_TO hierarchy (Site, Plant, System, SubSystem, etc.)
+from tools.read_cypher import read_cypher  # Execute read-only Cypher (fallback when domain tools are insufficient)
 
 # -----------------------------------------------------------------------------
 # MCP instructions
@@ -34,7 +36,8 @@ MCP_INSTRUCTIONS: str = (
     "Single node: get_node_by_name(name) — looks up nodes by name across all available node types; then use container_contents_count(start_node_id, ...) or container_contents_list(start_node_id, ...). "
     "Existence: count_nodes_by_name(name) checks for EXACT name matches only. For prefix/partial matching, use container_contents_count_by_name or container_contents_list_by_name with name_match='prefix'. Global count: count_by_label(label). "
     "Full breakdown: count_assets_breakdown(container_type='Both') and count_assets_by_category(category_scope='both'). "
-    "When presenting count results: show total_count first, then display the summary_table as-is."
+    "When presenting count results: show total_count first, then display the summary_table as-is. "
+    "Fallback: get_schema() for graph structure (labels, relationship types, property keys); read_cypher(query, limit?) for read-only Cypher when domain tools cannot answer. Database is read-only."
 )
 
 # -----------------------------------------------------------------------------
@@ -57,6 +60,8 @@ mcp.tool()(container_contents_list_by_name)
 mcp.tool()(container_contents_count)
 mcp.tool()(container_contents_list)
 mcp.tool()(count_assets_breakdown)
+mcp.tool()(get_schema)
+mcp.tool()(read_cypher)
 
 
 # -----------------------------------------------------------------------------

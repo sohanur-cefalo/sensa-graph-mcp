@@ -25,7 +25,9 @@ from tools.count_by_label import count_by_label
 from tools.count_nodes_by_name import count_nodes_by_name
 from tools.describe_node_connections import describe_node_connections
 from tools.get_node_by_name import get_node_by_name
+from tools.get_schema import get_schema
 from tools.list_categories import list_categories
+from tools.read_cypher import read_cypher
 from neo4j_config import get_driver, get_all_labels_from_db
 
 load_dotenv()
@@ -69,6 +71,8 @@ TOOL_REGISTRY = {
     "container_contents_count": container_contents_count,
     "container_contents_list": container_contents_list,
     "count_assets_breakdown": count_assets_breakdown,
+    "get_schema": get_schema,
+    "read_cypher": read_cypher,
 }
 
 
@@ -568,6 +572,8 @@ Available tools:
 - container_contents_count: Count items in a container (requires node_id from get_node_by_name)
 - container_contents_list: List items in a container (requires node_id from get_node_by_name)
 - count_assets_breakdown: Full breakdown of assets per Location/System
+- get_schema: Introspect graph structure (labels, relationship types, property keys). Use when you need to understand the schema to answer a question or when domain tools are insufficient.
+- read_cypher: Execute a read-only Cypher query (MATCH, RETURN, etc.). Use only when domain tools cannot answer the question. Writes, schema changes, and PROFILE/EXPLAIN are rejected. Optional argument: limit (default 1000).
 
 Important guidelines:
 - For queries about "how many assets in X" or "items in X", use container_contents_count_by_name with relationship_types=["LOCATED_IN"] and target_label="Asset"
@@ -583,6 +589,7 @@ Important guidelines:
   * Try get_node_by_name first, then use container_contents_count/list
   * Try searching for similar names or check if the name needs to be more specific
 - If you need a node_id first, call get_node_by_name, then use container_contents_count or container_contents_list
+- Prefer the domain-specific tools above; use get_schema only when you need to see labels/relationship types (e.g. to write Cypher), and read_cypher only when the question cannot be answered with the other tools (e.g. custom analytics). The database is read-only.
 - Only provide a final answer when you have successfully found results. If all attempts fail, explain what you tried and why it didn't work.
 - Always provide clear, helpful summaries of the results
 - Do NOT output planning or partial responses like "Let me check..." or "I'll look into that..." as your only response. Either call the appropriate tool(s) first (in the same turn, without such preamble), or after you have tool results, output only the final summary. Never respond with only a sentence that says you will check something without actually calling tools."""
@@ -732,6 +739,14 @@ Important guidelines:
                     break
                 # Check for categories or other data
                 if tool_result.get("categories") and len(tool_result.get("categories", [])) > 0:
+                    has_successful_result = True
+                    break
+                # get_schema: success when schema summary is present
+                if tool_result.get("summary"):
+                    has_successful_result = True
+                    break
+                # read_cypher: success when no error (even if result list is empty)
+                if "result" in tool_result and not tool_result.get("error"):
                     has_successful_result = True
                     break
         

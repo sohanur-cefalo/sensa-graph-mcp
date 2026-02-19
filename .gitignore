@@ -34,6 +34,7 @@ ENV/
 # Node.js / Frontend
 frontend/node_modules/
 node_modules/
+frontend/.vite/
 
 # IDE and editors
 .idea/
