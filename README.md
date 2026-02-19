@@ -1,6 +1,37 @@
-# MCP Setup and Usage Guide
+# Asset Graph RAG
 
-This guide explains how to set up and run the Asset Graph RAG MCP server, configure MCP tools, and use them in Cursor.
+Asset Graph RAG is a knowledge-graph application that lets you query an asset graph (Neo4j) in natural language. It includes:
+
+- **Backend** – FastAPI server that uses Claude to interpret questions and call Neo4j-backed MCP tools
+- **Frontend** – React + Vite app for chat and graph visualization (Neo4j NVL)
+- **MCP server** – Model Context Protocol server exposing the same tools for use in Cursor and other MCP clients
+
+---
+
+## Quick start with Docker Compose
+
+From the project root you can run Neo4j, the backend, and the frontend with a single command:
+
+```bash
+docker compose up -d
+```
+
+Make sure a `.env` file in the project root includes `CLAUDE_API_KEY` (the backend needs it for natural-language queries). Optionally set `CLAUDE_MODEL` and `MAX_RESPONSE_LENGTH`. Never commit real API keys.
+
+After the stack is up:
+
+| Service      | URL                      |
+|-------------|---------------------------|
+| Frontend    | http://localhost:3000     |
+| Backend API | http://localhost:8000     |
+| Neo4j Browser | http://localhost:7474   |
+| Neo4j Bolt  | `bolt://localhost:7687`   |
+
+Neo4j auth is `neo4j` / `password` (match these in your `.env` if you run backend or frontend locally).
+
+To run only Neo4j in Docker and run the backend and frontend on your machine, start Neo4j with `docker compose up -d neo4j`, then follow [Project setup](#project-setup) and [Neo4j configuration](#neo4j-configuration).
+
+---
 
 ## Table of Contents
 

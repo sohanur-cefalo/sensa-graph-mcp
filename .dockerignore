@@ -1,0 +1,14 @@
+# Backend build: ignore frontend, env, and dev artifacts
+frontend
+.env
+.env.*
+!.env.sample
+__pycache__
+*.pyc
+.git
+*.md
+docs
+terminals
+.vscode
+.cursor
+node_modules
