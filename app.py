@@ -6,6 +6,7 @@ Uses Claude to analyze queries and select appropriate tools.
 import inspect
 import json
 import os
+import re
 from typing import Any, Union, get_args, get_origin, Literal, Optional
 
 from anthropic import Anthropic
@@ -571,9 +572,11 @@ Available tools:
 Important guidelines:
 - For queries about "how many assets in X" or "items in X", use container_contents_count_by_name with relationship_types=["LOCATED_IN"] and target_label="Asset"
 - IMPORTANT: When passing array parameters (like relationship_types), pass them as actual arrays, NOT as JSON strings. For example: relationship_types=["LOCATED_IN"] not relationship_types='["LOCATED_IN"]'
-- For partial names (e.g., "Halls" meaning all halls), use name_match="prefix"
-- For exact names, use name_match="exact" (default)
-- If exact match fails, try name_match="prefix" to find nodes that start with the name
+- For generic or plural names (e.g. "biofilters", "halls", "where are the biofilters"), always use name_match="prefix" and the base name (e.g. name="Biofilter", name="Hall"). Exact match only finds a single node with that exact name; prefix finds all nodes whose name starts with the string (e.g. Biofilter 1, Biofilter 2, ...).
+- For specific single items use name_match="exact" (default).
+- If exact match fails or returns found:false, try name_match="prefix" to find all nodes that start with the name.
+- For "where is X" or "where are X", use container_contents_count_by_name or container_contents_list_by_name with name_match="prefix" to find all X nodes, then use describe_node_connections on one of them to see the location hierarchy, or infer from the fingerprints (e.g. AA_H01_RAS_Biofilter 1 = Aardal, Hall 1, RAS).
+- count_assets_breakdown: use container_type="Context" if the graph uses Context for locations (e.g. when container_type="Location" returns empty); "Both" includes Location, System, and Context.
 - If a tool returns "found": false or an error, try alternative approaches:
   * Try name_match="prefix" instead of "exact"
   * Try different relationship_types
@@ -581,7 +584,8 @@ Important guidelines:
   * Try searching for similar names or check if the name needs to be more specific
 - If you need a node_id first, call get_node_by_name, then use container_contents_count or container_contents_list
 - Only provide a final answer when you have successfully found results. If all attempts fail, explain what you tried and why it didn't work.
-- Always provide clear, helpful summaries of the results"""
+- Always provide clear, helpful summaries of the results
+- Do NOT output planning or partial responses like "Let me check..." or "I'll look into that..." as your only response. Either call the appropriate tool(s) first (in the same turn, without such preamble), or after you have tool results, output only the final summary. Never respond with only a sentence that says you will check something without actually calling tools."""
     
     # Initialize conversation history and tracking
     conversation_messages = [
@@ -626,17 +630,37 @@ Important guidelines:
                 elif content.type == "tool_use":
                     tool_use_blocks.append(content)
         
-        # If Claude provided a text answer, we're done
+        # If Claude provided a text answer, we're done (unless it's planning text with no tools run yet)
         if text_response and not tool_use_blocks:
-            # Add assistant's final message to conversation
+            # Reject planning-style responses when no tools have been executed yet
+            planning_phrases = (
+                r"let me (check|look|find|examine|see|get)",
+                r"now let me",
+                r"I'll (check|look|find|examine)",
+                r"I will (check|look|find|examine)",
+                r"by examining (their |the )?connections",
+                r"examining their connections",
+            )
+            is_planning = any(
+                re.search(p, text_response, re.IGNORECASE) for p in planning_phrases
+            )
+            if len(all_tool_calls) == 0 and is_planning:
+                # Model returned planning text without calling tools; prompt it to continue
+                conversation_messages.append({
+                    "role": "assistant",
+                    "content": message.content,
+                })
+                conversation_messages.append({
+                    "role": "user",
+                    "content": "Continue. Call the appropriate tool(s) to answer the question, then provide your final answer. Do not output only planning or partial responses.",
+                })
+                continue
+            # Genuine final answer
             conversation_messages.append({
                 "role": "assistant",
                 "content": message.content,
             })
-            
-            # Truncate response if max_response_length is set
             truncated_response = truncate_response(text_response, max_response_length)
-            
             return ChatResponse(
                 response=truncated_response,
                 tool_calls=all_tool_calls,
@@ -723,7 +747,7 @@ Important guidelines:
             "content": tool_result_blocks,
         })
         
-        # If we have successful results, ask Claude for final answer
+        # If we have successful results, ask Claude for final answer (or more tool calls)
         if has_successful_result:
             try:
                 final_message = anthropic.messages.create(
@@ -733,26 +757,54 @@ Important guidelines:
                     messages=conversation_messages,
                     tools=tools,
                 )
-                
-                # Extract final answer
-                answer = ""
+                final_text = ""
+                final_tool_use_blocks = []
                 for content in final_message.content:
-                    if hasattr(content, "type") and content.type == "text":
-                        answer = content.text
-                    elif hasattr(content, "text"):
-                        answer = content.text
-                
-                if answer:
-                    # Truncate response if max_response_length is set
-                    truncated_answer = truncate_response(answer, max_response_length)
-                    
-                    return ChatResponse(
-                        response=truncated_answer,
-                        tool_calls=all_tool_calls,
-                        tool_results=all_tool_results,
+                    if hasattr(content, "type"):
+                        if content.type == "text":
+                            final_text = content.text
+                        elif content.type == "tool_use":
+                            final_tool_use_blocks.append(content)
+                # If model requested more tools (e.g. to fetch sensors), run them and continue loop
+                if final_tool_use_blocks:
+                    conversation_messages.append({
+                        "role": "assistant",
+                        "content": final_message.content,
+                    })
+                    more_tool_result_blocks = []
+                    for tool_use in final_tool_use_blocks:
+                        result = execute_tool(tool_use.name, tool_use.input)
+                        all_tool_calls.append({"tool_name": tool_use.name, "arguments": tool_use.input})
+                        all_tool_results.append({"tool_name": tool_use.name, "result": result})
+                        more_tool_result_blocks.append({
+                            "type": "tool_result",
+                            "tool_use_id": tool_use.id,
+                            "content": json.dumps(result),
+                        })
+                    conversation_messages.append({
+                        "role": "user",
+                        "content": more_tool_result_blocks,
+                    })
+                    continue
+                # Genuine final text answer
+                if final_text:
+                    is_planning = any(
+                        re.search(p, final_text, re.IGNORECASE)
+                        for p in (
+                            r"let me (check|look|find|examine|see|get)",
+                            r"now let me",
+                            r"I'll (check|look|find|examine)",
+                            r"examining their connections",
+                        )
                     )
+                    if not is_planning:
+                        truncated_answer = truncate_response(final_text, max_response_length)
+                        return ChatResponse(
+                            response=truncated_answer,
+                            tool_calls=all_tool_calls,
+                            tool_results=all_tool_results,
+                        )
             except Exception as e:
-                # If final summarization fails, continue to next iteration
                 pass
         
         # If no successful results and we've hit max iterations, break

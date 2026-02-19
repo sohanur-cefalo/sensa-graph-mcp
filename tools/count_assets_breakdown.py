@@ -11,24 +11,26 @@ from tools._shared import build_validity_clause, format_count_summary_table
 _BREAKDOWN_CONFIG: dict[str, tuple[str, str]] = {
     "Location": ("LOCATED_IN", "Location"),
     "System": ("PART_OF_SYSTEM", "System"),
+    "Context": ("LOCATED_IN", "Context"),
 }
 
 
 def count_assets_breakdown(
-    container_type: Literal["Location", "System", "Both"] = "Both",
+    container_type: Literal["Location", "System", "Context", "Both"] = "Both",
     validity_filter: Optional[dict[str, Any]] = None,
 ) -> dict[str, Any]:
     """
-    For "how many assets in my graph" / full breakdown: list every Location and/or every System
+    For "how many assets in my graph" / full breakdown: list every Location, System, and/or Context
     with how many assets each has. Returns summary_table(s) and total_count so the answer is
     always in table format with a total row.
-    container_type: "Location" (assets per location), "System" (assets per system), or "Both".
+    container_type: "Location", "System", "Context" (assets per context/location hierarchy),
+    or "Both" (Location + System). Use "Context" when the graph uses Context nodes for places.
     """
     validity_clause, as_of_date = build_validity_clause(validity_filter)
     optional_validity = f" AND (r IS NULL OR (1=1 {validity_clause}))" if validity_clause else ""
 
-    types_to_run: list[Literal["Location", "System"]] = (
-        ["Location", "System"] if container_type == "Both" else [container_type]
+    types_to_run: list[Literal["Location", "System", "Context"]] = (
+        ["Location", "System", "Context"] if container_type == "Both" else [container_type]
     )
     params: dict[str, Any] = {}
     if as_of_date:
@@ -80,16 +82,20 @@ def count_assets_breakdown(
             out["total_assets_in_graph"] = out.get("total_assets_in_graph", 0) + total
 
     if container_type == "Both" and types_to_run:
-        loc_total = out["breakdown"].get("Location", {}).get("total_result", 0)
-        sys_total = out["breakdown"].get("System", {}).get("total_result", 0)
-        out["total_assets_in_graph"] = max(loc_total, sys_total) if (loc_total and sys_total) else (loc_total or sys_total)
+        totals = [
+            out["breakdown"].get(d, {}).get("total_result", 0)
+            for d in types_to_run
+        ]
+        non_zero = [t for t in totals if t]
+        out["total_assets_in_graph"] = max(totals) if non_zero else 0
 
     out["total_count"] = out["total_assets_in_graph"]
     if container_type == "Both":
-        out["summary_table"] = (
-            "**By Location**\n\n" + out["summary_tables"].get("Location", "")
-            + "\n\n**By System**\n\n" + out["summary_tables"].get("System", "")
-        )
+        parts = [
+            f"**By {dim}**\n\n" + out["summary_tables"].get(dim, "")
+            for dim in types_to_run
+        ]
+        out["summary_table"] = "\n\n".join(parts)
     else:
         out["summary_table"] = out["summary_tables"].get(container_type, "")
 
