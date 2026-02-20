@@ -76,6 +76,42 @@ TOOL_REGISTRY = {
 }
 
 
+def _to_json_serializable(obj: Any) -> Any:
+    """Recursively convert Neo4j Node/Relationship and other non-JSON-serializable types for json.dumps."""
+    if obj is None or isinstance(obj, (str, int, float, bool)):
+        return obj
+    if isinstance(obj, dict):
+        return {k: _to_json_serializable(v) for k, v in obj.items()}
+    if isinstance(obj, (list, tuple)):
+        return [_to_json_serializable(x) for x in obj]
+    # Neo4j Node (has element_id and labels)
+    if hasattr(obj, "element_id") and hasattr(obj, "labels"):
+        return {
+            "node_id": str(getattr(obj, "element_id", None) or getattr(obj, "id", "")),
+            "labels": list(getattr(obj, "labels", [])),
+            "properties": _to_json_serializable(dict(obj)),
+        }
+    # Neo4j Relationship (has element_id and type)
+    if hasattr(obj, "element_id") and hasattr(obj, "type"):
+        return {
+            "relationship_id": str(getattr(obj, "element_id", "")),
+            "type": str(getattr(obj, "type", "")),
+            "start_node": _to_json_serializable(getattr(obj, "start_node", None)),
+            "end_node": _to_json_serializable(getattr(obj, "end_node", None)),
+            "properties": _to_json_serializable(dict(obj)),
+        }
+    # datetime / date
+    if hasattr(obj, "isoformat") and callable(getattr(obj, "isoformat")):
+        return obj.isoformat()
+    # Neo4j Record or other mapping-like
+    if hasattr(obj, "keys") and hasattr(obj, "__getitem__") and not isinstance(obj, type):
+        try:
+            return _to_json_serializable(dict(obj))
+        except (TypeError, ValueError):
+            pass
+    return str(obj)
+
+
 def python_type_to_json_schema(annotation: Any) -> dict[str, Any]:
     """Convert Python type annotation to JSON Schema."""
     if annotation == inspect.Parameter.empty:
@@ -684,17 +720,18 @@ Important guidelines:
             
             # Execute the tool
             result = execute_tool(tool_use.name, tool_use.input)
+            result_serializable = _to_json_serializable(result)
             
             iteration_tool_results.append({
                 "tool_name": tool_use.name,
-                "result": result,
+                "result": result_serializable,
             })
             
             # Build tool result block for Claude
             tool_result_blocks.append({
                 "type": "tool_result",
                 "tool_use_id": tool_use.id,
-                "content": json.dumps(result),
+                "content": json.dumps(result_serializable),
             })
         
         # Add to overall tracking
@@ -782,12 +819,13 @@ Important guidelines:
                     more_tool_result_blocks = []
                     for tool_use in final_tool_use_blocks:
                         result = execute_tool(tool_use.name, tool_use.input)
+                        result_serializable = _to_json_serializable(result)
                         all_tool_calls.append({"tool_name": tool_use.name, "arguments": tool_use.input})
-                        all_tool_results.append({"tool_name": tool_use.name, "result": result})
+                        all_tool_results.append({"tool_name": tool_use.name, "result": result_serializable})
                         more_tool_result_blocks.append({
                             "type": "tool_result",
                             "tool_use_id": tool_use.id,
-                            "content": json.dumps(result),
+                            "content": json.dumps(result_serializable),
                         })
                     conversation_messages.append({
                         "role": "user",
