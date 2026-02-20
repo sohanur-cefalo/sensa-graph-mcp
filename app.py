@@ -15,19 +15,19 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
-from tools.count_assets_breakdown import count_assets_breakdown
-from tools.count_assets_by_category import count_assets_by_category
-from tools.container_contents_count import container_contents_count
-from tools.container_contents_count_by_name import container_contents_count_by_name
-from tools.container_contents_list import container_contents_list
-from tools.container_contents_list_by_name import container_contents_list_by_name
+from tools.count_breakdown import count_breakdown
+from tools.count_by_category import count_by_category
 from tools.count_by_label import count_by_label
-from tools.count_nodes_by_name import count_nodes_by_name
-from tools.describe_node_connections import describe_node_connections
-from tools.get_node_by_name import get_node_by_name
+from tools.count_nodes import count_nodes
+from tools.count_related import count_related
+from tools.count_related_by_name import count_related_by_name
+from tools.find_node import find_node
+from tools.list_related_by_name import list_related_by_name
+from tools.get_node_connections import get_node_connections
 from tools.get_schema import get_schema
+from tools.list_related import list_related
 from tools.list_categories import list_categories
-from tools.read_cypher import read_cypher
+from tools.run_query import run_query
 from neo4j_config import get_driver, get_all_labels_from_db
 
 load_dotenv()
@@ -58,21 +58,21 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Tool registry mapping tool names to their functions
+# Tool registry: generic names for any knowledge graph (not project-specific)
 TOOL_REGISTRY = {
-    "get_node_by_name": get_node_by_name,
-    "count_nodes_by_name": count_nodes_by_name,
+    "find_node": find_node,
+    "count_nodes": count_nodes,
     "count_by_label": count_by_label,
     "list_categories": list_categories,
-    "describe_node_connections": describe_node_connections,
-    "count_assets_by_category": count_assets_by_category,
-    "container_contents_count_by_name": container_contents_count_by_name,
-    "container_contents_list_by_name": container_contents_list_by_name,
-    "container_contents_count": container_contents_count,
-    "container_contents_list": container_contents_list,
-    "count_assets_breakdown": count_assets_breakdown,
+    "get_node_connections": get_node_connections,
+    "count_by_category": count_by_category,
+    "count_related": count_related,
+    "count_related_by_name": count_related_by_name,
+    "list_related": list_related,
+    "list_related_by_name": list_related_by_name,
+    "count_breakdown": count_breakdown,
     "get_schema": get_schema,
-    "read_cypher": read_cypher,
+    "run_query": run_query,
 }
 
 
@@ -560,36 +560,29 @@ Your job is to:
 5. Continue trying until you find a successful answer or exhaust reasonable options
 6. After tools are executed successfully, summarize the results in a clear, natural language response
 
-Available tools:
-- get_node_by_name: Find a node by name (returns node_id for use with other tools)
-- count_nodes_by_name: Count nodes with a given name (exact match)
-- count_by_label: Count all nodes with a given label (e.g., "Asset", "Location")
-- list_categories: List all category nodes and their hierarchy
-- describe_node_connections: Show how a node is connected (incoming/outgoing relationships)
-- count_assets_by_category: Count assets per category (location/system categories)
-- container_contents_count_by_name: Count items in a container by name (use name_match="prefix" for partial matches like "Hall" to find "Hall 1", "Hall 2", etc.)
-- container_contents_list_by_name: List items in a container by name
-- container_contents_count: Count items in a container (requires node_id from get_node_by_name)
-- container_contents_list: List items in a container (requires node_id from get_node_by_name)
-- count_assets_breakdown: Full breakdown of assets per Location/System
+Available tools (generic names for any knowledge graph):
+- find_node: Find (first) node with a given name; returns node_id, label, attributes for count_related/list_related.
+- count_nodes: Count nodes with a given name (exact match).
+- count_by_label: Count all nodes with a given label (e.g., "Asset", "Location").
+- list_categories: List category nodes and their hierarchy.
+- get_node_connections: Show how a node is connected (incoming/outgoing relationships).
+- count_by_category: Count entities per category (location/system or other dimensions).
+- count_related_by_name: For "how many entities in X" (e.g. assets in Biofilter 11): finds ALL nodes named X, counts related entities (e.g. Asset with LOCATED_IN) per node, returns total_count and per-node breakdown. Prefer this for count-in-location questions.
+- list_related_by_name: Same but lists the related entities (finds all nodes by name, then lists related per node). Use for "list assets in X".
+- count_related: Count related to a single node (use node_id from find_node). Use when you already have one node_id.
+- list_related: List related to a single node (use node_id from find_node).
+- count_breakdown: Full breakdown of entity counts per container/dimension (Location, System, Context)
 - get_schema: Introspect graph structure (labels, relationship types, property keys). Use when you need to understand the schema to answer a question or when domain tools are insufficient.
-- read_cypher: Execute a read-only Cypher query (MATCH, RETURN, etc.). Use only when domain tools cannot answer the question. Writes, schema changes, and PROFILE/EXPLAIN are rejected. Optional argument: limit (default 1000).
+- run_query: Execute a read-only query (e.g. Cypher: MATCH, RETURN). Use only when domain tools cannot answer the question. Writes and schema changes are rejected. Optional argument: limit (default 1000).
 
 Important guidelines:
-- For queries about "how many assets in X" or "items in X", use container_contents_count_by_name with relationship_types=["LOCATED_IN"] and target_label="Asset"
+- For "how many entities in X" (e.g. "Count the number of assets in Biofilter 11"): use count_related_by_name(name=X, relationship_types=["LOCATED_IN"], target_label="Asset"). It finds all nodes named X, counts assets per node, and returns the total. For "list items in X" use list_related_by_name with the same parameters. Use relationship_types and target_label appropriate to the graph.
 - IMPORTANT: When passing array parameters (like relationship_types), pass them as actual arrays, NOT as JSON strings. For example: relationship_types=["LOCATED_IN"] not relationship_types='["LOCATED_IN"]'
-- For generic or plural names (e.g. "biofilters", "halls", "where are the biofilters"), always use name_match="prefix" and the base name (e.g. name="Biofilter", name="Hall"). Exact match only finds a single node with that exact name; prefix finds all nodes whose name starts with the string (e.g. Biofilter 1, Biofilter 2, ...).
-- For specific single items use name_match="exact" (default).
-- If exact match fails or returns found:false, try name_match="prefix" to find all nodes that start with the name.
-- For "where is X" or "where are X", use container_contents_count_by_name or container_contents_list_by_name with name_match="prefix" to find all X nodes, then use describe_node_connections on one of them to see the location hierarchy, or infer from the fingerprints (e.g. AA_H01_RAS_Biofilter 1 = Aardal, Hall 1, RAS).
-- count_assets_breakdown: use container_type="Context" if the graph uses Context for locations (e.g. when container_type="Location" returns empty); "Both" includes Location, System, and Context.
-- If a tool returns "found": false or an error, try alternative approaches:
-  * Try name_match="prefix" instead of "exact"
-  * Try different relationship_types
-  * Try get_node_by_name first, then use container_contents_count/list
-  * Try searching for similar names or check if the name needs to be more specific
-- If you need a node_id first, call get_node_by_name, then use container_contents_count or container_contents_list
-- Prefer the domain-specific tools above; use get_schema only when you need to see labels/relationship types (e.g. to write Cypher), and read_cypher only when the question cannot be answered with the other tools (e.g. custom analytics). The database is read-only.
+- For generic or plural names (e.g. "biofilters", "halls"), call find_node with the base name (e.g. name="Biofilter", name="Hall"); if not found, try other names or get_node_connections to explore.
+- For "where is X" or "where are X", use find_node then get_node_connections on the node name (or on nodes[0] if a single node) to see hierarchy.
+- count_breakdown: use container_type="Context" if the graph uses Context for places when container_type="Location" returns empty; "Both" includes Location, System, and Context.
+- If find_node returns "found": false or nodes is empty, try a different name or get_node_connections on a related node.
+- Prefer the domain tools above; use get_schema when you need labels/relationship types, and run_query only when the question cannot be answered with other tools. The database is read-only.
 - Only provide a final answer when you have successfully found results. If all attempts fail, explain what you tried and why it didn't work.
 - Always provide clear, helpful summaries of the results
 - Do NOT output planning or partial responses like "Let me check..." or "I'll look into that..." as your only response. Either call the appropriate tool(s) first (in the same turn, without such preamble), or after you have tool results, output only the final summary. Never respond with only a sentence that says you will check something without actually calling tools."""
@@ -745,7 +738,7 @@ Important guidelines:
                 if tool_result.get("summary"):
                     has_successful_result = True
                     break
-                # read_cypher: success when no error (even if result list is empty)
+                # run_query: success when no error (even if result list is empty)
                 if "result" in tool_result and not tool_result.get("error"):
                     has_successful_result = True
                     break

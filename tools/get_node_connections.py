@@ -1,4 +1,4 @@
-"""Describe how a node is connected: incoming and outgoing relationships."""
+"""Get how a node is connected: incoming and outgoing relationships."""
 
 from __future__ import annotations
 
@@ -9,20 +9,20 @@ from neo4j_config import get_driver, get_node_by_name_labels
 from tools._shared import node_to_dict
 
 
-def describe_node_connections(
+def get_node_connections(
     name: str,
     include_attributes: bool = False,
 ) -> dict[str, Any]:
     """
     For a node found by name (any available node type), list all
     incoming and outgoing relationships: type and the other node's name/label.
-    Use for: "How is Feeding System connected?", "What is inside system X?",
-    "How is system X connected with others?", "What links to Aardal?".
+    Use for: "How is X connected?", "What is inside X?",
+    "How is X connected with others?", "What links to X?".
     """
     driver = get_driver()
     labels = get_node_by_name_labels()
     with driver.session() as session:
-        # Resolve name to node (same order as get_node_by_name)
+        # Resolve name to node (same order as find_node)
         node_id: Optional[str] = None
         node_label: Optional[str] = None
         node_attrs: dict[str, Any] = {}

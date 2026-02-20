@@ -1,4 +1,4 @@
-"""Full graph asset breakdown: assets per Location and/or System in table form."""
+"""Full graph entity breakdown: entities per Location/System/Context in table form."""
 
 from __future__ import annotations
 
@@ -15,16 +15,14 @@ _BREAKDOWN_CONFIG: dict[str, tuple[str, str]] = {
 }
 
 
-def count_assets_breakdown(
+def count_breakdown(
     container_type: Literal["Location", "System", "Context", "Both"] = "Both",
     validity_filter: Optional[dict[str, Any]] = None,
 ) -> dict[str, Any]:
     """
-    For "how many assets in my graph" / full breakdown: list every Location, System, and/or Context
-    with how many assets each has. Returns summary_table(s) and total_count so the answer is
-    always in table format with a total row.
-    container_type: "Location", "System", "Context" (assets per context/location hierarchy),
-    or "Both" (Location + System). Use "Context" when the graph uses Context nodes for places.
+    Full breakdown: list every Location, System, and/or Context with how many entities each has.
+    Returns summary_table(s) and total_count. container_type: "Location", "System", "Context",
+    or "Both". Use "Context" when the graph uses Context nodes for places.
     """
     validity_clause, as_of_date = build_validity_clause(validity_filter)
     optional_validity = f" AND (r IS NULL OR (1=1 {validity_clause}))" if validity_clause else ""

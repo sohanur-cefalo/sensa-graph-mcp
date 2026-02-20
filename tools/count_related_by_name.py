@@ -1,4 +1,4 @@
-"""Count nodes that point into container(s) found by name (e.g. assets in a location/system)."""
+"""Count nodes related to node(s) found by name (exact or prefix)."""
 
 from __future__ import annotations
 
@@ -14,7 +14,7 @@ from tools._shared import (
 )
 
 
-def container_contents_count_by_name(
+def count_related_by_name(
     name: str,
     relationship_types: list[str],
     target_label: Optional[str] = None,
@@ -26,8 +26,8 @@ def container_contents_count_by_name(
     """
     Find ALL nodes matching the given name, then for EACH
     count nodes that have INCOMING relationships of the given types to that node.
-    Use for "How many assets in Biofilter 11?" (exact) or "How many items in Biofilter?"
-    (prefix). Returns per-node breakdown and summary_table with total.
+    Use for "How many entities in X?" (exact) or "How many items in X?" (prefix).
+    Returns per-node breakdown and summary_table with total.
     """
     allowed_labels = get_allowed_labels()
     if target_label is not None and target_label not in allowed_labels:
@@ -55,9 +55,8 @@ def container_contents_count_by_name(
     driver = get_driver()
     with driver.session() as session:
         start_nodes: list[dict[str, Any]] = []
-        seen_node_ids: set[str] = set()  # Deduplicate by node_id to avoid double-counting nodes with multiple labels
+        seen_node_ids: set[str] = set()
         for lbl in labels_to_try:
-            # Apply parent filter to Location and Context nodes (both can be locations)
             use_parent = parent_location_name and lbl in ("Location", "Context")
             q = (
                 f"MATCH (n:{lbl}) WHERE {name_cond}"

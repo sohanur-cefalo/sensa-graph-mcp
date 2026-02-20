@@ -1,12 +1,12 @@
 """
 Answer evaluation_questions.csv using the same logic as the MCP tools:
-  get_node_by_name, count_nodes_by_name, count_by_label, container_contents_count, container_contents_list
+  find_node, count_nodes, count_by_label, count_related, list_related
 
 Minimal tool usage:
-- Count in location: get_node_by_name(X) + container_contents_count(LOCATED_IN, Asset) or container_contents_count_by_name
-- Existence: count_nodes_by_name(name)
+- Count in location: find_node(X) + count_related(start_node_id, LOCATED_IN, Asset)
+- Existence: count_nodes(name)
 - Global count: count_by_label(label)
-- List in location: get_node_by_name(X) + container_contents_list(LOCATED_IN, Asset) or container_contents_list_by_name
+- List in location: find_node(X) + list_related(start_node_id, LOCATED_IN, Asset)
 
 Requires Neo4j with data loaded via ingest_to_neo4j.py.
 
@@ -34,7 +34,7 @@ def get_driver():
 
 
 def get_node_by_name(driver, label: str, name: str) -> dict[str, Any]:
-    """Same contract as MCP get_node_by_name."""
+    """Same contract as MCP find_node (local helper for this script)."""
     with driver.session() as session:
         query = f"MATCH (n:{label} {{name: $name}}) RETURN n LIMIT 1"
         result = session.run(query, name=name)

@@ -7,13 +7,13 @@ from typing import Any, Optional
 from neo4j_config import get_allowed_labels, get_driver, get_node_by_name_labels
 
 
-def count_nodes_by_name(
+def count_nodes(
     name: str,
     label: Optional[str] = None,
 ) -> dict[str, Any]:
     """
     Count nodes with the given name. Use for existence/count questions like
-    "Do we have any Acidity?" or "How many X are there?". If label is not set,
+    "Do we have any X?" or "How many X are there?". If label is not set,
     counts across all available node types in priority order.
     Returns total count and per-label breakdown.
     """

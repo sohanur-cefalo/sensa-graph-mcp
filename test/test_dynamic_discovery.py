@@ -11,7 +11,7 @@ sys.path.insert(0, _project_root)
 
 from neo4j_config import get_allowed_labels, get_node_by_name_labels
 from tools.list_categories import list_categories
-from tools.count_assets_by_category import count_assets_by_category
+from tools.count_by_category import count_by_category
 
 
 def main():
@@ -22,7 +22,7 @@ def main():
     lookup_order = get_node_by_name_labels()
     print(f"Node lookup priority order: {lookup_order}\n")
     
-    print("=== 2. List Categories (Dynamic) ===\n")
+    print("=== 2. List Taxonomy (Dynamic) ===\n")
     categories = list_categories(include_hierarchy=True)
     print(f"Total categories: {categories.get('category_count')}")
     print(f"Category names: {[c['name'] for c in categories.get('categories', [])]}")
@@ -32,8 +32,8 @@ def main():
             print(f"  - {h['description']}")
     print()
     
-    print("=== 3. Count Assets by Category (Dynamic Discovery) ===\n")
-    asset_counts = count_assets_by_category(category_scope="both")
+    print("=== 3. Count by Category (Dynamic Discovery) ===\n")
+    asset_counts = count_by_category(category_scope="both")
     print(f"Total assets (location categories): {asset_counts.get('total_assets_location_categories')}")
     print(f"Location categories found: {[c['category_name'] for c in asset_counts.get('by_location_category', [])]}")
     print(f"\nTotal assets (system categories): {asset_counts.get('total_assets_system_categories')}")

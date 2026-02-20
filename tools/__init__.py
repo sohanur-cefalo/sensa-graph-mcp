@@ -1,1 +1,1 @@
-"""MCP tools for the Asset Graph. Each tool lives in its own module."""
+"""Knowledge graph tools (generic names). Each tool lives in its own module."""

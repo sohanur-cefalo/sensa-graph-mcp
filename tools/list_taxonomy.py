@@ -1,4 +1,4 @@
-"""List category nodes and how they connect (e.g. BELONGS_TO hierarchy)."""
+"""List taxonomy/category nodes and how they connect (e.g. BELONGS_TO hierarchy)."""
 
 from __future__ import annotations
 
@@ -7,7 +7,7 @@ from typing import Any
 from neo4j_config import get_driver
 
 
-def list_categories(include_hierarchy: bool = True) -> dict[str, Any]:
+def list_taxonomy(include_hierarchy: bool = True) -> dict[str, Any]:
     """
     List all Category nodes and optionally how they connect to each other via BELONGS_TO.
     Use for: "What categories exist?", "How are categories connected?",

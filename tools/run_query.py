@@ -1,4 +1,4 @@
-"""Execute read-only Cypher queries. Rejects writes, schema changes, and PROFILE/EXPLAIN."""
+"""Execute read-only query (e.g. Cypher). Rejects writes, schema changes, and PROFILE/EXPLAIN."""
 
 from __future__ import annotations
 
@@ -20,17 +20,16 @@ _READ_ONLY_FORBIDDEN = re.compile(
 )
 
 
-def read_cypher(query: str, limit: int = 1000) -> dict[str, Any]:
+def run_query(query: str, limit: int = 1000) -> dict[str, Any]:
     """
-    Execute a read-only Cypher query. Use for ad-hoc questions when domain tools
-    are not sufficient. Only SELECT-style queries are allowed (MATCH, RETURN, etc.).
+    Execute a read-only query (e.g. Cypher). Use when domain tools are not sufficient.
+    Only SELECT-style queries are allowed (MATCH, RETURN, etc.).
     Write operations, schema changes, and PROFILE/EXPLAIN are rejected.
     """
     query = (query or "").strip()
     if not query:
         return {"error": "Query cannot be empty"}
 
-    # Reject forbidden keywords
     if _READ_ONLY_FORBIDDEN.search(query):
         return {
             "error": "Read-only mode: query must not contain write or admin operations "
@@ -41,7 +40,6 @@ def read_cypher(query: str, limit: int = 1000) -> dict[str, Any]:
     driver = get_driver()
     try:
         with driver.session() as session:
-            # Enforce a limit if the query does not already have one
             normalized = query.rstrip().rstrip(";")
             if " LIMIT " not in normalized.upper():
                 normalized = f"{normalized} LIMIT {limit}"

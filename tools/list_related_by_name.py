@@ -1,4 +1,4 @@
-"""List nodes that point into container(s) found by name (e.g. assets in a location/system)."""
+"""List nodes related to node(s) found by name (exact or prefix)."""
 
 from __future__ import annotations
 
@@ -14,7 +14,7 @@ from tools._shared import (
 )
 
 
-def container_contents_list_by_name(
+def list_related_by_name(
     name: str,
     relationship_types: list[str],
     target_label: Optional[str] = None,
@@ -27,8 +27,7 @@ def container_contents_list_by_name(
     """
     Find ALL nodes matching the given name, then for EACH
     list nodes that have INCOMING relationships of the given types to that node.
-    Use for "List assets in Biofilter 11" or "What's in Water Quality Treatment System?".
-    Returns per_node with result lists and summary_table.
+    Use for "List entities in X" or "What's in X?". Returns per_node with result lists and summary_table.
     """
     allowed_labels = get_allowed_labels()
     if target_label is not None and target_label not in allowed_labels:
@@ -56,9 +55,8 @@ def container_contents_list_by_name(
     driver = get_driver()
     with driver.session() as session:
         start_nodes: list[dict[str, Any]] = []
-        seen_node_ids: set[str] = set()  # Deduplicate by node_id to avoid double-counting nodes with multiple labels
+        seen_node_ids: set[str] = set()
         for lbl in labels_to_try:
-            # Apply parent filter to Location and Context nodes (both can be locations)
             use_parent = parent_location_name and lbl in ("Location", "Context")
             q = (
                 f"MATCH (n:{lbl}) WHERE {name_cond}"
