@@ -354,6 +354,7 @@ def execute_tool(tool_name: str, arguments: dict[str, Any]) -> dict[str, Any]:
 class ChatRequest(BaseModel):
     """Request model for chat endpoint."""
     query: str
+    model: Optional[str] = None  # Override CLAUDE_MODEL for this request (e.g. benchmarking)
 
 
 class ChatResponse(BaseModel):
@@ -582,6 +583,8 @@ async def chat(request: ChatRequest):
     if not query:
         raise HTTPException(status_code=400, detail="Query cannot be empty")
     
+    effective_model = request.model or claude_model
+    
     # Get tool schemas
     tools = get_tool_schemas()
     
@@ -643,7 +646,7 @@ Important guidelines:
         try:
             # Call Claude to select tools or provide final answer
             message = anthropic.messages.create(
-                model=claude_model,
+                model=effective_model,
                 max_tokens=4096,
                 system=system_message,
                 messages=conversation_messages,
@@ -796,7 +799,7 @@ Important guidelines:
         if has_successful_result:
             try:
                 final_message = anthropic.messages.create(
-                    model=claude_model,
+                    model=effective_model,
                     max_tokens=4096,
                     system=system_message,
                     messages=conversation_messages,
@@ -860,7 +863,7 @@ Important guidelines:
     # If we exit the loop without a final answer, get one from Claude
     try:
         final_message = anthropic.messages.create(
-            model=claude_model,
+            model=effective_model,
             max_tokens=4096,
             system=system_message,
             messages=conversation_messages,

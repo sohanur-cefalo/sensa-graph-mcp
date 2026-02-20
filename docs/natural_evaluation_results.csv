@@ -1,0 +1,255 @@
+Question,Answer_opus_4_6,ToolCalls_opus_4_6,Answer_sonnet_4_6,ToolCalls_sonnet_4_6,Answer_haiku_4_5,ToolCalls_haiku_4_5
+How many things are in Biofilter 11?,"There are **4 entities** located in nodes named **Biofilter 11** across the graph. Specifically, there are four separate ""Biofilter 11"" contexts (one in each hall), each containing 1 entity:
+
+| Context (Location Path) | Count |
+| --- | --- |
+| AA_H01_RAS_Biofilter 11 (Hall 01) | 1 |
+| AA_H02_RAS_Biofilter 11 (Hall 02) | 1 |
+| AA_H03_RAS_Biofilter 11 (Hall 03) | 1 |
+| AA_H04_RAS_Biofilter 11 (Hall 04) | 1 |
+| **Total** | **4** |
+
+So in total, **4 things** are in Biofilter 11 (1 per hall).",count_related_by_name,"There are **4 things** located in **Biofilter 11** in total. The graph contains 4 separate ""Biofilter 11"" contexts (one per hall: H01, H02, H03, and H04), each containing **1 item**:
+
+| Biofilter 11 Context | Count |
+|---|---|
+| AA_H01_RAS_Biofilter 11 | 1 |
+| AA_H02_RAS_Biofilter 11 | 1 |
+| AA_H03_RAS_Biofilter 11 | 1 |
+| AA_H04_RAS_Biofilter 11 | 1 |
+| **Total** | **4** |
+
+Each hall (H01–H04) has its own Biofilter 11 with 1 entity assigned to it. Would you like more details about what those entities are?",count_related_by_name,"There are **4 things** in Biofilter 11. 
+
+The Biofilter 11 location consists of 4 different Context nodes (representing different sections: AA_H01, AA_H02, AA_H03, and AA_H04), and each one contains 1 entity located in it, for a total of 4 entities across all Biofilter 11 sections.","find_node, count_related_by_name"
+Can you tell me the item count for Biofilter 12?,"Here's the item count for **Biofilter 12**:
+
+There are **4 assets** in total across all instances of Biofilter 12, distributed as follows:
+
+| Location (Context) | Asset Count |
+|---|---|
+| AA_H01_RAS_Biofilter 12 | 1 |
+| AA_H02_RAS_Biofilter 12 | 1 |
+| AA_H03_RAS_Biofilter 12 | 1 |
+| AA_H04_RAS_Biofilter 12 | 1 |
+| **Total** | **4** |
+
+There are 4 separate Biofilter 12 contexts (one in each hall: H01, H02, H03, and H04), each containing 1 asset.",count_related_by_name,"There are **4 items** in total associated with **Biofilter 12**, spread across 4 different contexts. Here's the breakdown:
+
+| Context (Fingerprint)     | Item Count |
+|---------------------------|------------|
+| AA_H01_RAS_Biofilter 12   | 1          |
+| AA_H02_RAS_Biofilter 12   | 1          |
+| AA_H03_RAS_Biofilter 12   | 1          |
+| AA_H04_RAS_Biofilter 12   | 1          |
+| **Total**                 | **4**      |
+
+Each of the four halls (H01–H04) has its own instance of Biofilter 12, each containing 1 item.",count_related_by_name,"**Item count for Biofilter 12:**
+
+There are **4 instances of Biofilter 12**, each containing **1 item**, for a total of **4 items** across all Biofilter 12 locations.
+
+The breakdown is:
+- AA_H01_RAS_Biofilter 12: 1 item
+- AA_H02_RAS_Biofilter 12: 1 item
+- AA_H03_RAS_Biofilter 12: 1 item
+- AA_H04_RAS_Biofilter 12: 1 item","find_node, count_related, count_related, count_related, count_related"
+What's the number of assets in Biofilter 13?,"There are **4 assets** in total across all locations named **Biofilter 13**. Here's the breakdown:
+
+| Location (Context) | Assets |
+| --- | --- |
+| AA_H01_RAS_Biofilter 13 | 1 |
+| AA_H02_RAS_Biofilter 13 | 1 |
+| AA_H03_RAS_Biofilter 13 | 1 |
+| AA_H04_RAS_Biofilter 13 | 1 |
+| **Total** | **4** |
+
+There are four separate ""Biofilter 13"" contexts (one in each hall: H01, H02, H03, and H04), each containing 1 asset.",count_related_by_name,"There are **4 assets** in total across all **Biofilter 13** locations. Here's the breakdown by context:
+
+| Context (Fingerprint)     | Assets |
+|---------------------------|--------|
+| AA_H01_RAS_Biofilter 13   | 1      |
+| AA_H02_RAS_Biofilter 13   | 1      |
+| AA_H03_RAS_Biofilter 13   | 1      |
+| AA_H04_RAS_Biofilter 13   | 1      |
+| **Total**                 | **4**  |
+
+The name ""Biofilter 13"" exists in 4 different contexts (H01 through H04), each containing **1 asset**, for a combined total of **4 assets**.",count_related_by_name,"There are **4 assets** in Biofilter 13. 
+
+The results show that there are 4 different Context nodes all named ""Biofilter 13"" (with different fingerprints representing different halls/sections: AA_H01, AA_H02, AA_H03, and AA_H04), and each one contains 1 asset, for a total of 4 assets.",count_related_by_name
+How much equipment is at the Biofilter 13 area?,"There are **4 pieces of equipment** (assets) across all **Biofilter 13** areas. Here's the breakdown by location:
+
+| Location | Assets |
+|---|---|
+| AA_H01_RAS_Biofilter 13 | 1 |
+| AA_H02_RAS_Biofilter 13 | 1 |
+| AA_H03_RAS_Biofilter 13 | 1 |
+| AA_H04_RAS_Biofilter 13 | 1 |
+| **Total** | **4** |
+
+There are four separate ""Biofilter 13"" contexts — one in each hall (H01, H02, H03, and H04) — each containing 1 asset.",count_related_by_name,"There are **4 pieces of equipment** located across all **Biofilter 13** areas. The graph contains 4 distinct ""Biofilter 13"" contexts (spanning halls H01 through H04), each housing **1 asset**, for a combined total of **4 assets**:
+
+| Context (Fingerprint)   | Assets |
+|-------------------------|--------|
+| AA_H01_RAS_Biofilter 13 | 1      |
+| AA_H02_RAS_Biofilter 13 | 1      |
+| AA_H03_RAS_Biofilter 13 | 1      |
+| AA_H04_RAS_Biofilter 13 | 1      |
+| **Total**               | **4**  |
+
+Each hall (H01–H04) has its own Biofilter 13 area with one piece of equipment assigned to it.",count_related_by_name,"There are **4 pieces of equipment** at the Biofilter 13 area. 
+
+The equipment is distributed across 4 different contexts within Biofilter 13:
+- AA_H01_RAS_Biofilter 13: 1 asset
+- AA_H02_RAS_Biofilter 13: 1 asset
+- AA_H03_RAS_Biofilter 13: 1 asset
+- AA_H04_RAS_Biofilter 13: 1 asset",count_related_by_name
+Count up all the items inside Biofilter 14 for me.,"Here's the breakdown of items inside **Biofilter 14**:
+
+There are **4 items in total**, spread across four different instances of Biofilter 14 in the system:
+
+| Location (Context) | Item Count |
+|---|---|
+| AA_H01_RAS_Biofilter 14 | 1 |
+| AA_H02_RAS_Biofilter 14 | 1 |
+| AA_H03_RAS_Biofilter 14 | 1 |
+| AA_H04_RAS_Biofilter 14 | 1 |
+| **Total** | **4** |
+
+Each of the four halls (H01, H02, H03, H04) has a Biofilter 14 context, and each contains 1 item located within it.",count_related_by_name,"Here's the count of all items inside **Biofilter 14**:
+
+| Biofilter 14 Context | Item Count |
+|---|---|
+| AA_H01_RAS_Biofilter 14 | 1 |
+| AA_H02_RAS_Biofilter 14 | 1 |
+| AA_H03_RAS_Biofilter 14 | 1 |
+| AA_H04_RAS_Biofilter 14 | 1 |
+| **Total** | **4** |
+
+There are **4 items** in total across all instances of Biofilter 14. It appears in 4 different contexts (Hall 01–04, all within the RAS system), each containing **1 item**. Let me know if you'd like more details on any of these!",count_related_by_name,"There are **4 items** located inside Biofilter 14. 
+
+The items are organized across four different context nodes within the Biofilter:
+- AA_H01_RAS_Biofilter 14 (1 item)
+- AA_H02_RAS_Biofilter 14 (1 item)
+- AA_H03_RAS_Biofilter 14 (1 item)
+- AA_H04_RAS_Biofilter 14 (1 item)",count_related_by_name
+How many items belong to Biofilter 15?,"There are **4 items** that belong to **Biofilter 15** in total. They are spread across four different contexts (locations), each containing 1 item:
+
+| Context | Items |
+|---|---|
+| AA_H01_RAS_Biofilter 15 | 1 |
+| AA_H02_RAS_Biofilter 15 | 1 |
+| AA_H03_RAS_Biofilter 15 | 1 |
+| AA_H04_RAS_Biofilter 15 | 1 |
+| **Total** | **4** |
+
+There are four instances of ""Biofilter 15,"" one in each hall (H01, H02, H03, H04), and each has 1 item located in it.",count_related_by_name,"There are **4 items** in total that belong to **Biofilter 15**. The node ""Biofilter 15"" appears in 4 different contexts (across different halls/RAS systems), each containing 1 item:
+
+| Context | Items |
+|---|---|
+| AA_H01_RAS_Biofilter 15 | 1 |
+| AA_H02_RAS_Biofilter 15 | 1 |
+| AA_H03_RAS_Biofilter 15 | 1 |
+| AA_H04_RAS_Biofilter 15 | 1 |
+| **Total** | **4** |
+
+Each instance of Biofilter 15 belongs to a separate hall (H01, H02, H03, H04) within the RAS system.",count_related_by_name,"**Answer: There are 4 items (assets) located in Biofilter 15.**
+
+The results show there are actually 4 different ""Biofilter 15"" contexts in the system (corresponding to different sections AA_H01 through AA_H04 of the RAS), and each contains 1 asset, for a total of 4 assets.","count_related_by_name, get_node_connections, count_related_by_name"
+Could you give me the total number of items in Biofilter 15?,"There are **4 items** in total across all instances of **Biofilter 15**. Here's the breakdown by location context:
+
+| Context | Count |
+|---|---|
+| AA_H01_RAS_Biofilter 15 | 1 |
+| AA_H02_RAS_Biofilter 15 | 1 |
+| AA_H03_RAS_Biofilter 15 | 1 |
+| AA_H04_RAS_Biofilter 15 | 1 |
+| **Total** | **4** |
+
+There are 4 separate Biofilter 15 contexts (one in each hall: H01, H02, H03, and H04), each containing 1 item.",count_related_by_name,"There are **4 items in total** across all ""Biofilter 15"" locations. The graph contains 4 distinct **Biofilter 15** context nodes, each belonging to a different hall (H01–H04), and each holds **1 item**:
+
+| Context (Fingerprint)     | Item Count |
+|---------------------------|------------|
+| AA_H01_RAS_Biofilter 15   | 1          |
+| AA_H02_RAS_Biofilter 15   | 1          |
+| AA_H03_RAS_Biofilter 15   | 1          |
+| AA_H04_RAS_Biofilter 15   | 1          |
+| **Total**                 | **4**      |",count_related_by_name,"The total number of items in Biofilter 15 is **4 assets**. These assets are distributed across 4 different contexts within Biofilter 15:
+- AA_H01_RAS_Biofilter 15: 1 asset
+- AA_H02_RAS_Biofilter 15: 1 asset
+- AA_H03_RAS_Biofilter 15: 1 asset
+- AA_H04_RAS_Biofilter 15: 1 asset",count_related_by_name
+How many components are at Biofilter 2?,"There are **4 components (assets)** at locations named **Biofilter 2**, spread across four different contexts:
+
+| Context | Assets |
+|---|---|
+| AA_H01_RAS_Biofilter 2 | 1 |
+| AA_H02_RAS_Biofilter 2 | 1 |
+| AA_H03_RAS_Biofilter 2 | 1 |
+| AA_H04_RAS_Biofilter 2 | 1 |
+| **Total** | **4** |
+
+Each of the four halls (H01–H04) has one asset located in its respective Biofilter 2.",count_related_by_name,"There are **4 components** located at **Biofilter 2** in total. The graph contains 4 distinct ""Biofilter 2"" contexts (across different halls/zones), each with 1 asset:
+
+| Context (Fingerprint) | Assets |
+|---|---|
+| AA_H01_RAS_Biofilter 2 | 1 |
+| AA_H02_RAS_Biofilter 2 | 1 |
+| AA_H03_RAS_Biofilter 2 | 1 |
+| AA_H04_RAS_Biofilter 2 | 1 |
+| **Total** | **4** |
+
+Each ""Biofilter 2"" belongs to a different hall (H01, H02, H03, H04), and each has exactly 1 component assigned to it.",count_related_by_name,"Based on the query results, there are **4 components (assets) at Biofilter 2**. These are distributed across four different contexts within Biofilter 2:
+- AA_H01_RAS_Biofilter 2 (1 asset)
+- AA_H02_RAS_Biofilter 2 (1 asset)
+- AA_H03_RAS_Biofilter 2 (1 asset)
+- AA_H04_RAS_Biofilter 2 (1 asset)","count_related_by_name, get_schema, count_related_by_name"
+I need to know how many things are located in Biofilter 3.,"There are **4 entities** located in nodes named **Biofilter 3** across the graph. Specifically, there are four separate ""Biofilter 3"" contexts (one in each hall), each containing 1 entity:
+
+| Location (Context) | Entities |
+|---|---|
+| AA_H01_RAS_Biofilter 3 (Hall 1) | 1 |
+| AA_H02_RAS_Biofilter 3 (Hall 2) | 1 |
+| AA_H03_RAS_Biofilter 3 (Hall 3) | 1 |
+| AA_H04_RAS_Biofilter 3 (Hall 4) | 1 |
+| **Total** | **4** |
+
+So there are **4 things in total** located in Biofilter 3, with one entity per hall. Would you like to see the details of those entities?",count_related_by_name,"There are **4 things** located across all nodes named **Biofilter 3**. The graph contains 4 distinct ""Biofilter 3"" contexts (one per hall/unit), and each has **1 entity** located in it:
+
+| Context (Fingerprint) | Count |
+|---|---|
+| AA_H01_RAS_Biofilter 3 | 1 |
+| AA_H02_RAS_Biofilter 3 | 1 |
+| AA_H03_RAS_Biofilter 3 | 1 |
+| AA_H04_RAS_Biofilter 3 | 1 |
+| **Total** | **4** |
+
+Each ""Biofilter 3"" appears to belong to a different hall (H01–H04) within the same RAS system. If you'd like to narrow it down to a specific hall or see what exactly is located in each, just let me know!",count_related_by_name,"There are **4 things located in Biofilter 3**. 
+
+The results show there are 4 Context nodes named ""Biofilter 3"" (with different fingerprints indicating different sections or zones: AA_H01, AA_H02, AA_H03, and AA_H04), and each has 1 item located in it, for a total of 4 items.",count_related_by_name
+Can you count the equipment in Biofilter 3?,"There are **4 pieces of equipment** (assets) across all locations named **Biofilter 3**. Here's the breakdown:
+
+| Location (Context) | Assets |
+| --- | --- |
+| AA_H01_RAS_Biofilter 3 | 1 |
+| AA_H02_RAS_Biofilter 3 | 1 |
+| AA_H03_RAS_Biofilter 3 | 1 |
+| AA_H04_RAS_Biofilter 3 | 1 |
+| **Total** | **4** |
+
+There are 4 instances of ""Biofilter 3"" across different halls (H01, H02, H03, H04), each containing 1 asset. Would you like to see the details of these assets or narrow down to a specific hall?",count_related_by_name,"There are **4 pieces of equipment** located in **Biofilter 3** in total. The graph found 4 distinct ""Biofilter 3"" contexts (across different halls/zones), each containing **1 asset**:
+
+| Context (Fingerprint)     | Assets |
+|---------------------------|--------|
+| AA_H01_RAS_Biofilter 3    | 1      |
+| AA_H02_RAS_Biofilter 3    | 1      |
+| AA_H03_RAS_Biofilter 3    | 1      |
+| AA_H04_RAS_Biofilter 3    | 1      |
+| **Total**                 | **4**  |
+
+Each of the four halls (H01, H02, H03, H04) has its own **Biofilter 3**, and each contains 1 asset. Would you like more details about any specific one?",count_related_by_name,"Based on the results, **there are 4 pieces of equipment located in Biofilter 3**. 
+
+The equipment is distributed across 4 different contexts within Biofilter 3:
+- 1 asset in AA_H01_RAS_Biofilter 3
+- 1 asset in AA_H02_RAS_Biofilter 3
+- 1 asset in AA_H03_RAS_Biofilter 3
+- 1 asset in AA_H04_RAS_Biofilter 3",count_related_by_name
