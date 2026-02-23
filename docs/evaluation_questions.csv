@@ -1,4 +1,19 @@
 Question,Probable Answer,Type
+
+"Show me flow for Hall 1"
+"Flow trend last 7 days for Hall 1"
+"Flow data for Hall 2"
+"Last 30 days flow trend at Hall 1"
+Other signals
+"Capacity for Hall 1"
+"Ozone trend for Hall 2"
+"Last 7 days capacity at Hall 3"
+Other locations (if your graph links signals to these)
+"Flow for CenterChannel"
+"Flow trend for Tank_1"
+
+
+
 Count the number of assets in Biofilter 11
 
 Describe / connections:

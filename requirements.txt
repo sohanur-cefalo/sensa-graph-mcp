@@ -5,3 +5,4 @@ fastapi>=0.104.0
 uvicorn[standard]>=0.24.0
 pydantic>=2.0.0
 anthropic>=0.34.0
+influxdb3-python>=0.18.0

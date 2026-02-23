@@ -28,6 +28,7 @@ from tools.get_schema import get_schema
 from tools.list_related import list_related
 from tools.list_categories import list_categories
 from tools.run_query import run_query
+from tools.query_influxdb import query_influxdb
 from neo4j_config import get_driver, get_all_labels_from_db
 
 load_dotenv()
@@ -73,6 +74,7 @@ TOOL_REGISTRY = {
     "count_breakdown": count_breakdown,
     "get_schema": get_schema,
     "run_query": run_query,
+    "query_influxdb": query_influxdb,
 }
 
 
@@ -613,6 +615,7 @@ Available tools (generic names for any knowledge graph):
 - count_breakdown: Full breakdown of entity counts per container/dimension (Location, System, Context)
 - get_schema: Introspect graph structure (labels, relationship types, property keys). Use when you need to understand the schema to answer a question or when domain tools are insufficient.
 - run_query: Execute a read-only query (e.g. Cypher: MATCH, RETURN). Use only when domain tools cannot answer the question. Writes and schema changes are rejected. Optional argument: limit (default 1000).
+- query_influxdb: Query time-series data from InfluxDB (e.g. flow, temperature) for a location. Use for: "last 7 days trend of flow", "current/recent flow for Hall 1", "flow trend", "historical flow". Args: location_name (required), optional signal_name (e.g. "Flow"), natural_query (e.g. "last 7 days trend"), time_range (e.g. "7 days"), limit.
 
 Important guidelines:
 - For "how many entities in X" (e.g. "Count the number of assets in Biofilter 11"): use count_related_by_name(name=X, relationship_types=["LOCATED_IN"], target_label="Asset"). It finds all nodes named X, counts assets per node, and returns the total. For "list items in X" use list_related_by_name with the same parameters. Use relationship_types and target_label appropriate to the graph.
@@ -622,6 +625,7 @@ Important guidelines:
 - count_breakdown: use container_type="Context" if the graph uses Context for places when container_type="Location" returns empty; "Both" includes Location, System, and Context.
 - If find_node returns "found": false or nodes is empty, try a different name or get_node_connections on a related node.
 - Prefer the domain tools above; use get_schema when you need labels/relationship types, and run_query only when the question cannot be answered with other tools. The database is read-only.
+- For time-series questions (flow trend, last N days of flow/temperature for a location): use query_influxdb with location_name, and optionally signal_name (e.g. "Flow"), natural_query (e.g. "last 7 days trend"), time_range (e.g. "7 days").
 - Only provide a final answer when you have successfully found results. If all attempts fail, explain what you tried and why it didn't work.
 - Always provide clear, helpful summaries of the results
 - Do NOT output planning or partial responses like "Let me check..." or "I'll look into that..." as your only response. Either call the appropriate tool(s) first (in the same turn, without such preamble), or after you have tool results, output only the final summary. Never respond with only a sentence that says you will check something without actually calling tools."""

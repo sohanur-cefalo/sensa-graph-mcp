@@ -18,6 +18,7 @@ from tools.get_schema import get_schema
 from tools.list_related import list_related
 from tools.list_related_by_name import list_related_by_name
 from tools.list_categories import list_categories
+from tools.query_influxdb import query_influxdb
 from tools.run_query import run_query
 
 # -----------------------------------------------------------------------------
@@ -33,7 +34,8 @@ MCP_INSTRUCTIONS: str = (
     "Existence: count_nodes(name). Global count: count_by_label(label). "
     "Full breakdown: count_breakdown(container_type='Both') and count_by_category(category_scope='both'). "
     "When presenting count results: show total_count first, then display the summary_table as-is. "
-    "Fallback: get_schema() for graph structure; run_query(query, limit?) for read-only query when domain tools cannot answer. Database is read-only."
+    "Fallback: get_schema() for graph structure; run_query(query, limit?) for read-only query when domain tools cannot answer. Database is read-only. "
+    "For time-series (flow trend, last N days flow/temperature for a location): use query_influxdb(location_name, signal_name?, natural_query?, time_range?, limit?)."
 )
 
 # -----------------------------------------------------------------------------
@@ -57,6 +59,7 @@ mcp.tool()(list_related)
 mcp.tool()(list_related_by_name)
 mcp.tool()(count_breakdown)
 mcp.tool()(get_schema)
+mcp.tool()(query_influxdb)
 mcp.tool()(run_query)
 
 
