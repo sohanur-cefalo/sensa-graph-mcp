@@ -18,6 +18,7 @@ The tool will:
 from __future__ import annotations
 
 import os
+import re
 from typing import Any, Optional
 
 from anthropic import Anthropic
@@ -62,27 +63,27 @@ def find_signals_by_location(
     params = {"location_name": location_name}
     
     if signal_name:
-        query += " AND toLower(s.name) = toLower($signal_name)"
-        params["signal_name"] = signal_name
-    
+        query += " AND toLower(trim(s.name)) = toLower(trim($signal_name))"
+        params["signal_name"] = signal_name.strip()
+
     query += """
-    RETURN s.name AS name, 
-           s.guid AS guid, 
-           s.table AS table, 
+    RETURN s.name AS name,
+           s.guid AS guid,
+           s.table AS table,
            s.field_name_in_db AS field_name_in_db,
            s.database AS database,
            s.unique_id AS unique_id,
            elementId(s) AS node_id,
            a.name AS asset_name
-    
+
     UNION
-    
+
     MATCH (s:Signal)-[:SIGNAL_GENERATED_FROM]->(a:Asset)-[:LOCATED_IN]->(sub)-[:BELONGS_TO_LOCATION*]->(l)
     WHERE (l:Location OR l:Context) AND toLower(l.name) = toLower($location_name)
     """
     
     if signal_name:
-        query += " AND toLower(s.name) = toLower($signal_name)"
+        query += " AND toLower(trim(s.name)) = toLower(trim($signal_name))"
     
     query += """
     RETURN s.name AS name, 
@@ -115,6 +116,55 @@ def find_signals_by_location(
             if signal["table"] and signal["field_name_in_db"]:
                 signals.append(signal)
         
+        return signals
+
+
+def find_signals_by_signal_name(signal_name: str) -> list[dict[str, Any]]:
+    """
+    Find Signal nodes by signal name (case-insensitive), across all locations.
+
+    Args:
+        signal_name: Signal name to match (e.g., "capacity", "Flow")
+
+    Returns:
+        List of Signal node dictionaries with properties
+    """
+    if not signal_name or not signal_name.strip():
+        return []
+
+    driver = get_driver()
+    query = """
+    MATCH (s:Signal)-[:SIGNAL_GENERATED_FROM]->(a:Asset)
+    WHERE toLower(trim(s.name)) = toLower(trim($signal_name))
+      AND s.table IS NOT NULL AND s.field_name_in_db IS NOT NULL
+    RETURN s.name AS name,
+           s.guid AS guid,
+           s.table AS table,
+           s.field_name_in_db AS field_name_in_db,
+           s.database AS database,
+           s.unique_id AS unique_id,
+           elementId(s) AS node_id,
+           a.name AS asset_name
+    """
+    params = {"signal_name": signal_name.strip()}
+
+    with driver.session() as session:
+        result = session.run(query, params)
+        signals = []
+        for record in result:
+            guid = record.get("guid")
+            if not guid:
+                continue
+            signals.append({
+                "name": record.get("name"),
+                "guid": guid,
+                "table": record.get("table"),
+                "field_name_in_db": record.get("field_name_in_db"),
+                "database": record.get("database"),
+                "unique_id": record.get("unique_id"),
+                "node_id": record.get("node_id"),
+                "asset_name": record.get("asset_name"),
+            })
         return signals
 
 
@@ -221,6 +271,137 @@ SQL Query:"""
         raise Exception(f"Failed to generate SQL with Claude: {str(e)}")
 
 
+# Max data points to include in tool response so /chat API gets a small payload.
+# When exceeded, we return a summary + a small sample instead of full series.
+MAX_DATA_POINTS_IN_RESPONSE = 100
+
+# Interval units that InfluxDB SQL accepts (value + space + unit).
+_INTERVAL_UNITS = ("day", "days", "hour", "hours", "minute", "minutes", "week", "weeks")
+
+
+def _normalize_time_range(
+    time_range: Optional[str],
+    natural_query: Optional[str],
+) -> tuple[Optional[str], str]:
+    """
+    Normalize time_range so the SQL uses a proper interval (e.g. '7 days'), relative to now().
+    This ensures "last 7 days" always means from current date backward, not a bare number (e.g. 7 seconds).
+
+    Returns:
+        (normalized_interval_for_sql, human_readable_requested) e.g. ("7 days", "last 7 days from current date")
+    """
+    raw = (time_range or "").strip()
+    hint = (natural_query or "").lower()
+
+    # Already has a unit (e.g. "7 days", "24 hours")
+    if raw:
+        lower = raw.lower()
+        if any(u in lower for u in _INTERVAL_UNITS):
+            # Normalize "1 week" -> "7 days" for consistency
+            if "week" in lower:
+                try:
+                    n = int("".join(c for c in raw.split()[0] if c.isdigit()) or "1")
+                    return f"{n * 7} days", f"last {n} week(s) from current date"
+                except (ValueError, IndexError):
+                    pass
+            return raw, f"last {raw} from current date"
+
+        # Bare number: treat as days (e.g. "7" -> "7 days")
+        try:
+            n = int(raw)
+            if n <= 0:
+                return None, ""
+            return f"{n} days", f"last {n} days from current date"
+        except ValueError:
+            pass
+
+    # No time_range: try to infer from natural_query (e.g. "last 7 days", "last week")
+    if "last" in hint and "day" in hint:
+        m = re.search(r"last\s+(\d+)\s+days?", hint)
+        if m:
+            n = int(m.group(1))
+            return f"{n} days", f"last {n} days from current date"
+    if "last" in hint and "week" in hint:
+        m = re.search(r"last\s+(\d+)\s+weeks?", hint)
+        n = int(m.group(1)) if m else 1
+        return f"{n * 7} days", f"last {n} week(s) from current date"
+    if "last" in hint and "hour" in hint:
+        m = re.search(r"last\s+(\d+)\s+hours?", hint)
+        if m:
+            n = int(m.group(1))
+            return f"{n} hours", f"last {n} hours from current date"
+
+    return None, ""
+
+
+def _build_summary(
+    signals_queried: list[dict],
+    data: list[dict],
+    time_range_str: str,
+    requested_time_range: str = "",
+) -> dict[str, Any]:
+    """Build a compact summary for chat API when full data is too large."""
+    field_key = None
+    for row in data:
+        for k in row:
+            if k not in ("time", "guid", "signal_name", "asset_name") and isinstance(
+                row.get(k), (int, float)
+            ):
+                field_key = k
+                break
+        if field_key:
+            break
+    if not field_key:
+        field_key = "value"
+
+    by_guid: dict[str, list[dict]] = {}
+    for row in data:
+        g = row.get("guid") or ""
+        if g not in by_guid:
+            by_guid[g] = []
+        by_guid[g].append(row)
+
+    signals_summary = []
+    for sig in signals_queried:
+        guid = sig.get("guid")
+        rows = by_guid.get(guid) or []
+        vals = [r.get(field_key) for r in rows if r.get(field_key) is not None]
+        name = sig.get("asset_name") or sig.get("signal_name") or guid
+        s: dict[str, Any] = {
+            "asset": name,
+            "points": len(rows),
+        }
+        if vals:
+            s["min"] = round(min(vals), 4)
+            s["max"] = round(max(vals), 4)
+            s["mean"] = round(sum(vals) / len(vals), 4)
+        if rows:
+            s["first"] = {"time": rows[0].get("time"), field_key: rows[0].get(field_key)}
+            s["last"] = {"time": rows[-1].get("time"), field_key: rows[-1].get(field_key)}
+        signals_summary.append(s)
+
+    out: dict[str, Any] = {
+        "time_range": time_range_str,
+        "total_points": len(data),
+        "field": field_key,
+        "signals": signals_summary,
+    }
+    if requested_time_range:
+        out["requested_time_range"] = requested_time_range
+    return out
+
+
+def _sample_data(data: list[dict], max_points: int) -> list[dict]:
+    """Return a small chronological sample of data (first + last) to stay under limit."""
+    if len(data) <= max_points:
+        return data
+    n = max_points // 2
+    # data is sorted by (time, guid); take first n and last n
+    head = data[:n]
+    tail = data[-n:] if 2 * n <= len(data) else data[n:]
+    return head + tail
+
+
 def query_influxdb(
     location_name: Optional[str] = None,
     signal_name: Optional[str] = None,
@@ -236,8 +417,8 @@ def query_influxdb(
     generates SQL queries (with Claude assistance if needed), and executes them.
     
     Args:
-        location_name: Name of Location node (e.g., "Hall 1", "Tank Area 1")
-        signal_name: Optional signal name filter (e.g., "Flow", "Temperature")
+        location_name: Optional. Name of Location/Context node (e.g., "Hall 1"). If omitted, signal_name is used to find signals across all locations.
+        signal_name: Optional when location given; required when no location. Signal name filter (e.g., "capacity", "Flow"). Matching is case-insensitive.
         natural_query: Natural language description of what to query (e.g., "last 7 days trend")
         time_range: Optional explicit time range (e.g., "7 days", "24 hours")
         aggregation: Optional aggregation method (e.g., "hourly", "daily") - currently used as hint
@@ -249,24 +430,34 @@ def query_influxdb(
         - sql_query: First SQL query (or all in sql_queries when multiple signals)
         - data_points: Total number of data points returned
         - time_range: Time range of the data
-        - data: List of data points; each point includes time, the signal field (e.g. flow), guid, signal_name, and asset_name so multiple series can be distinguished
+        - summary: Compact summary for chat API (time_range, total_points, per-signal min/max/mean, first/last sample). Use this when response size is limited.
+        - data: List of data points (capped when large); each point includes time, the signal field (e.g. flow), guid, signal_name, and asset_name
         - error: Error message if query failed
     """
-    if not location_name:
+    # Either location or signal_name (or both) must be provided
+    if not location_name and not (signal_name and signal_name.strip()):
         return {
-            "error": "location_name is required",
+            "error": "Either location_name or signal_name is required",
             "signals_queried": [],
             "data": [],
         }
-    
+
     try:
-        # Step 1: Find Signal nodes
-        signals = find_signals_by_location(location_name, signal_name)
-        
+        # Step 1: Find Signal nodes (by location and optional signal, or by signal name only)
+        if location_name:
+            signals = find_signals_by_location(location_name, signal_name)
+        else:
+            signals = find_signals_by_signal_name(signal_name)
+
         if not signals:
+            if location_name:
+                err = f"No signals found for location '{location_name}'"
+                if signal_name:
+                    err += f" with signal name '{signal_name}'"
+            else:
+                err = f"No signals found with signal name '{signal_name}'"
             return {
-                "error": f"No signals found for location '{location_name}'"
-                + (f" with signal name '{signal_name}'" if signal_name else ""),
+                "error": err,
                 "signals_queried": [],
                 "data": [],
             }
@@ -298,11 +489,15 @@ def query_influxdb(
         
         limit_per_signal = max(100, limit // len(signals_to_query)) if signals_to_query else limit
         
+        # Normalize time range so "7" or "last 7 days" becomes "7 days" (relative to now())
+        sql_interval, requested_time_range_label = _normalize_time_range(
+            time_range, natural_query
+        )
         # Step 3: Build and run query for each signal (same time logic for all)
         time_clause = ""
         order_and_limit = f"ORDER BY time ASC LIMIT {limit_per_signal}"
-        if time_range:
-            time_clause = f" AND time >= now() - interval '{time_range}'"
+        if sql_interval:
+            time_clause = f" AND time >= now() - interval '{sql_interval}'"
         else:
             order_and_limit = f"ORDER BY time DESC LIMIT {limit_per_signal}"
         
@@ -321,9 +516,9 @@ def query_influxdb(
             """
             database = preferred_signal.get("database", "Raw")
             data = execute_query(database, sql_query)
-            if not time_range and data:
+            if not sql_interval and data:
                 data = list(reversed(data))
-            if time_range and not data:
+            if sql_interval and not data:
                 fallback_sql = f"""
                 SELECT time, {field}
                 FROM {preferred_signal['table']}
@@ -353,21 +548,35 @@ def query_influxdb(
         all_data.sort(key=lambda r: (r.get("time") or "", r.get("guid") or ""))
         data = all_data[:limit]
         
-        # Step 4: Time range summary
+        # Step 4: Time range and summary for chat API (keep response small)
         time_range_str = "Unknown"
         if data:
             times = [row.get("time") for row in data if row.get("time")]
             if times:
                 time_range_str = f"{min(times)} to {max(times)}"
-        
-        return {
+
+        total_points = len(data)
+        summary = _build_summary(
+            signals_queried, data, time_range_str, requested_time_range_label
+        )
+
+        if total_points > MAX_DATA_POINTS_IN_RESPONSE:
+            data = _sample_data(data, MAX_DATA_POINTS_IN_RESPONSE)
+            summary["truncated"] = True
+            summary["returned_points"] = len(data)
+
+        result: dict[str, Any] = {
             "signals_queried": signals_queried,
             "sql_query": sql_queries[0] if sql_queries else "",
             "sql_queries": sql_queries if len(sql_queries) > 1 else None,
-            "data_points": len(data),
+            "data_points": total_points,
             "time_range": time_range_str,
+            "summary": summary,
             "data": data,
         }
+        if requested_time_range_label:
+            result["requested_time_range"] = requested_time_range_label
+        return result
         
     except Exception as e:
         return {

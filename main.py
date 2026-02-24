@@ -35,7 +35,7 @@ MCP_INSTRUCTIONS: str = (
     "Full breakdown: count_breakdown(container_type='Both') and count_by_category(category_scope='both'). "
     "When presenting count results: show total_count first, then display the summary_table as-is. "
     "Fallback: get_schema() for graph structure; run_query(query, limit?) for read-only query when domain tools cannot answer. Database is read-only. "
-    "For time-series (flow trend, last N days flow/temperature for a location): use query_influxdb(location_name, signal_name?, natural_query?, time_range?, limit?)."
+    "For time-series (flow trend, last N days flow/temperature): use query_influxdb(location_name?, signal_name?, natural_query?, time_range?, limit?). Either location_name or signal_name is required; signal_name matching is case-insensitive (e.g. 'capacity' finds 'Capacity')."
 )
 
 # -----------------------------------------------------------------------------
