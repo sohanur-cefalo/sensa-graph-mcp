@@ -36,8 +36,18 @@ function replaceAssistantPlaceholder(
   return newList;
 }
 
+const SESSION_ID_KEY = 'graph-rag-chat-session-id';
+
 export function useChat() {
   const STORAGE_KEY = 'graph-rag-chat-messages';
+
+  const [sessionId, setSessionId] = useState<string | undefined>(() => {
+    try {
+      return localStorage.getItem(SESSION_ID_KEY) ?? undefined;
+    } catch {
+      return undefined;
+    }
+  });
 
   const [messages, setMessages] = useState<ChatMessageType[]>(() => {
     try {
@@ -66,6 +76,15 @@ export function useChat() {
     }
   }, [messages]);
 
+  useEffect(() => {
+    try {
+      if (sessionId) localStorage.setItem(SESSION_ID_KEY, sessionId);
+      else localStorage.removeItem(SESSION_ID_KEY);
+    } catch (err) {
+      console.error('Failed to persist session id', err);
+    }
+  }, [sessionId]);
+
   async function sendMessage() {
     const text = input.trim();
     if (!text) return;
@@ -80,8 +99,9 @@ export function useChat() {
     setIsLoading(true);
 
     try {
-      const response: ChatApiResponse = await callChatApi(text);
+      const response: ChatApiResponse = await callChatApi(text, sessionId);
 
+      if (response.sessionId) setSessionId(response.sessionId);
       setMessages((prev) =>
         replaceAssistantPlaceholder(prev, response.response)
       );
@@ -105,12 +125,16 @@ export function useChat() {
     }
   }
 
+  /** Clear chat and start a new session so the next message has no conversation history. */
   function clearMessages() {
+    const newSessionId = crypto.randomUUID();
     try {
       localStorage.removeItem(STORAGE_KEY);
+      localStorage.setItem(SESSION_ID_KEY, newSessionId);
     } catch (err) {
       console.error('Failed to clear messages from localStorage', err);
     }
+    setSessionId(newSessionId);
     setMessages([]);
   }
 

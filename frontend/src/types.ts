@@ -15,6 +15,8 @@ export interface JsonRelationship {
 export interface ChatApiResponse {
   query: string;
   response: string;
+  /** Session ID for conversation continuity; send on follow-up requests so the backend can use prior context. */
+  sessionId?: string;
   entityRelationships?: {
     entities: GraphResultNode[];
     relationships: GraphResultRel[];

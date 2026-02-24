@@ -23,14 +23,20 @@ const DEFAULT_TIMEOUT = 60_000;
 
 export interface ChatApiRequest {
   query: string;
+  /** If provided, backend uses this session's conversation history for follow-up context. */
+  session_id?: string;
 }
 
-export async function callChatApi(query: string): Promise<ChatApiResponse> {
+export async function callChatApi(
+  query: string,
+  sessionId?: string
+): Promise<ChatApiResponse> {
   const apiUrl = getChatApiUrl();
   const timeout = DEFAULT_TIMEOUT;
 
   const payload: ChatApiRequest = {
-    query
+    query,
+    ...(sessionId ? { session_id: sessionId } : {}),
   };
 
   const controller = new AbortController();

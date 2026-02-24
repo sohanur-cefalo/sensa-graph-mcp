@@ -7,6 +7,7 @@ import inspect
 import json
 import os
 import re
+import uuid
 from typing import Any, Union, get_args, get_origin, Literal, Optional
 
 from anthropic import Anthropic
@@ -353,10 +354,141 @@ def execute_tool(tool_name: str, arguments: dict[str, Any]) -> dict[str, Any]:
         return {"error": f"Error executing tool: {str(e)}\n{traceback.format_exc()}"}
 
 
+# Session-based chat history: session_id -> {"history": list, "cached_summary": str, "summary_up_to_turn": int}
+# New session_id = fresh context; no history is shared across sessions.
+SESSION_STORE: dict[str, dict[str, Any]] = {}
+MAX_HISTORY_PER_SESSION = 100  # Cap stored exchanges per session
+MAX_RECENT_MESSAGES_FULL = 10  # Keep last N messages in full (no summarization)
+SUMMARY_MAX_TOKENS = 300  # Cap summary length to reduce token bloat
+RE_SUMMARIZE_THRESHOLD = 5  # Re-summarize when this many new turns added to old section
+
+
+def _summarize_conversation(history: list[dict[str, str]], model: str) -> str:
+    """Summarize conversation history (list of user/assistant pairs) into a short summary."""
+    if not history:
+        return ""
+    lines = []
+    for i, turn in enumerate(history, 1):
+        lines.append(f"User: {turn.get('user', '')}")
+        lines.append(f"Assistant: {turn.get('assistant', '')}")
+    text = "\n".join(lines)
+    try:
+        msg = anthropic.messages.create(
+            model=model,
+            max_tokens=SUMMARY_MAX_TOKENS,
+            system="Summarize the following conversation in 2-3 concise sentences. Preserve only critical facts, entity names, and key conclusions so a follow-up question can be answered in context. Be very brief.",
+            messages=[{"role": "user", "content": text}],
+        )
+        for block in msg.content:
+            if getattr(block, "type", None) == "text":
+                return (block.text or "").strip()
+    except Exception:
+        pass
+    return text[:1000] + ("..." if len(text) > 1000 else "")
+
+
+def _build_chat_context(session_id: Optional[str], query: str, model: str) -> tuple[list[dict[str, Any]], str]:
+    """
+    Build initial conversation_messages for Claude from session history and current query.
+    Optimized strategy:
+    - No history or new session: [current user message]
+    - Up to MAX_RECENT_MESSAGES_FULL exchanges: pass all as user/assistant, then current
+    - More than MAX_RECENT_MESSAGES_FULL: cached summary of older turns + last MAX_RECENT_MESSAGES_FULL messages in full + current query.
+      Summary is only re-computed when new turns cross the threshold (smart caching).
+    Returns (messages, session_id to use).
+    """
+    sid = session_id or str(uuid.uuid4())
+    if sid not in SESSION_STORE:
+        SESSION_STORE[sid] = {"history": [], "cached_summary": "", "summary_up_to_turn": 0}
+    
+    session_data = SESSION_STORE[sid]
+    history = session_data.get("history", [])
+    cached_summary = session_data.get("cached_summary", "")
+    summary_up_to_turn = session_data.get("summary_up_to_turn", 0)
+
+    if not history:
+        return [{"role": "user", "content": query}], sid
+
+    n = len(history)
+    
+    # If we have <= MAX_RECENT_MESSAGES_FULL turns, send all in full
+    if n <= MAX_RECENT_MESSAGES_FULL:
+        messages: list[dict[str, Any]] = []
+        for turn in history:
+            messages.append({"role": "user", "content": turn["user"]})
+            messages.append({"role": "assistant", "content": turn["assistant"]})
+        messages.append({"role": "user", "content": query})
+        return messages, sid
+
+    # We have more than MAX_RECENT_MESSAGES_FULL turns
+    # Keep last MAX_RECENT_MESSAGES_FULL messages in full
+    recent_messages = history[-MAX_RECENT_MESSAGES_FULL:]
+    old_messages = history[:-MAX_RECENT_MESSAGES_FULL]
+    
+    # Check if we need to update the cached summary
+    # Re-summarize if: no cached summary exists, or if we've added enough new turns to the old section
+    turns_since_last_summary = len(old_messages) - summary_up_to_turn
+    needs_re_summarize = (
+        not cached_summary or 
+        turns_since_last_summary >= RE_SUMMARIZE_THRESHOLD or
+        summary_up_to_turn == 0
+    )
+    
+    if needs_re_summarize and old_messages:
+        # Re-summarize the old messages
+        cached_summary = _summarize_conversation(old_messages, model)
+        summary_up_to_turn = len(old_messages)
+        # Update the cached summary in session store
+        SESSION_STORE[sid]["cached_summary"] = cached_summary
+        SESSION_STORE[sid]["summary_up_to_turn"] = summary_up_to_turn
+
+    # Build messages: summary (if exists) + recent messages in full + current query
+    messages = []
+    if cached_summary:
+        messages.append({
+            "role": "user",
+            "content": f"Summary of earlier conversation:\n{cached_summary}",
+        })
+        messages.append({
+            "role": "assistant",
+            "content": "(Understood. Continuing with the following recent messages.)",
+        })
+    
+    # Add recent messages in full
+    for turn in recent_messages:
+        messages.append({"role": "user", "content": turn["user"]})
+        messages.append({"role": "assistant", "content": turn["assistant"]})
+    
+    # Add current query
+    messages.append({"role": "user", "content": query})
+    return messages, sid
+
+
+def _append_session_history(session_id: str, user_msg: str, assistant_msg: str) -> None:
+    """Append one exchange to session history and cap length."""
+    if session_id not in SESSION_STORE:
+        SESSION_STORE[session_id] = {"history": [], "cached_summary": "", "summary_up_to_turn": 0}
+    
+    session_data = SESSION_STORE[session_id]
+    history = session_data.get("history", [])
+    history.append({"user": user_msg, "assistant": assistant_msg})
+    
+    # Cap history length
+    if len(history) > MAX_HISTORY_PER_SESSION:
+        history = history[-MAX_HISTORY_PER_SESSION:]
+        # If we truncated history, invalidate cached summary (it may reference old turns)
+        session_data["cached_summary"] = ""
+        session_data["summary_up_to_turn"] = 0
+    
+    session_data["history"] = history
+    SESSION_STORE[session_id] = session_data
+
+
 class ChatRequest(BaseModel):
     """Request model for chat endpoint."""
     query: str
     model: Optional[str] = None  # Override CLAUDE_MODEL for this request (e.g. benchmarking)
+    session_id: Optional[str] = None  # If provided, conversation history is used; new id = fresh context
 
 
 class ChatResponse(BaseModel):
@@ -364,6 +496,7 @@ class ChatResponse(BaseModel):
     response: str
     tool_calls: list[dict[str, Any]]
     tool_results: list[dict[str, Any]]
+    session_id: Optional[str] = None  # Echo or new id; client should send this for follow-up messages
 
 
 @app.get("/")
@@ -587,6 +720,9 @@ async def chat(request: ChatRequest):
     
     effective_model = request.model or claude_model
     
+    # Session-based context: build messages from history (or summary) + current query
+    conversation_messages, session_id = _build_chat_context(request.session_id, query, effective_model)
+    
     # Get tool schemas
     tools = get_tool_schemas()
     
@@ -629,14 +765,6 @@ Important guidelines:
 - Only provide a final answer when you have successfully found results. If all attempts fail, explain what you tried and why it didn't work.
 - Always provide clear, helpful summaries of the results
 - Do NOT output planning or partial responses like "Let me check..." or "I'll look into that..." as your only response. Either call the appropriate tool(s) first (in the same turn, without such preamble), or after you have tool results, output only the final summary. Never respond with only a sentence that says you will check something without actually calling tools."""
-    
-    # Initialize conversation history and tracking
-    conversation_messages = [
-        {
-            "role": "user",
-            "content": query,
-        }
-    ]
     
     all_tool_calls = []
     all_tool_results = []
@@ -704,10 +832,12 @@ Important guidelines:
                 "content": message.content,
             })
             truncated_response = truncate_response(text_response, max_response_length)
+            _append_session_history(session_id, query, truncated_response)
             return ChatResponse(
                 response=truncated_response,
                 tool_calls=all_tool_calls,
                 tool_results=all_tool_results,
+                session_id=session_id,
             )
         
         # If no tools were called and no text response, we're done
@@ -852,10 +982,12 @@ Important guidelines:
                     )
                     if not is_planning:
                         truncated_answer = truncate_response(final_text, max_response_length)
+                        _append_session_history(session_id, query, truncated_answer)
                         return ChatResponse(
                             response=truncated_answer,
                             tool_calls=all_tool_calls,
                             tool_results=all_tool_results,
+                            session_id=session_id,
                         )
             except Exception as e:
                 pass
@@ -887,11 +1019,12 @@ Important guidelines:
     
     # Truncate response if max_response_length is set
     truncated_answer = truncate_response(answer, max_response_length)
-    
+    _append_session_history(session_id, query, truncated_answer)
     return ChatResponse(
         response=truncated_answer,
         tool_calls=all_tool_calls,
         tool_results=all_tool_results,
+        session_id=session_id,
     )
 
 
